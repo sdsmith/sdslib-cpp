@@ -1,0 +1,22 @@
+#!/bin/bash
+
+BUILD_MODE=""
+
+if ! [[ -d "artifacts" ]]; then
+    echo "run config.sh"
+    exit 0
+fi
+
+if [[ ! -z "$1" ]] ; then
+    case "$1" in
+        "debug") BUILD_MODE="-DCMAKE_BUILD_TYPE=Debug" ;;
+    esac
+fi
+
+pushd . >/dev/null
+cd artifacts >/dev/null
+# Build: point to cache from config
+cmake $BUILD_MODE --build .
+RET=$?
+popd >/dev/null
+exit $RET
