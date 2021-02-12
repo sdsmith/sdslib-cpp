@@ -1,10 +1,14 @@
 #pragma once
 
+#include <cassert> // TODO(sdsmith): shouldn't terminate during tests. they should mark as failures.
+#include <cstddef>
 #include <initializer_list>
+#include <iterator>
 #include <optional>
 #include <memory>
 
-namespace sds {
+namespace sds
+{
 
 template<typename ElT>
 class Linked_List {
@@ -15,6 +19,54 @@ public:
 
         Node(ElT value) : value(value) {}
     };
+
+    class Iterator {
+        Node* m_p;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = ElT;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        Iterator(Node* p) : m_p(p) {}
+        reference operator*() const { return m_p->value; }
+        pointer operator->() { return &m_p->value; }
+        // prefix inc
+        Iterator& operator++() { m_p = m_p->next.get(); return *this; }
+        // postfix inc
+        Iterator operator++(int) { Iterator it = *this; ++(*this); return it; }
+
+        friend bool operator==(Iterator const& a, Iterator const& b) { return a.m_p == b.m_p; }
+        friend bool operator!=(Iterator const& a, Iterator const& b) { return !(a == b); }
+    };
+
+    class Const_Iterator {
+        Node const* m_p;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = ElT const;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        Const_Iterator(Node const* p) : m_p(p) {}
+        reference operator*() const { return m_p->value; }
+        pointer operator->() { return &m_p->value; }
+        // prefix inc
+        Const_Iterator& operator++() { m_p = m_p->next.get(); return *this; }
+        // postfix inc
+        Const_Iterator operator++(int) { Const_Iterator it = *this; ++(*this); return it; }
+
+        friend bool operator==(Const_Iterator const& a, Const_Iterator const& b) { return a.m_p == b.m_p; }
+        friend bool operator!=(Const_Iterator const& a, Const_Iterator const& b) { return !(a == b); }
+    };
+
+
+    using iterator = Iterator;
+    using const_iterator = Const_Iterator;
 
     Linked_List() {}
 
@@ -32,11 +84,14 @@ public:
         std::unique_ptr<Node> const* o_cur = &o.m_head;
         while (*o_cur) {
             *cur = std::make_unique<Node>((*o_cur)->value);
-            cur = &(*cur)->next;
             o_cur = &(*o_cur)->next;
+            if (!*o_cur) {
+                m_tail = cur;
+            } else {
+                cur = &(*cur)->next;
+            }
         }
 
-        m_tail = cur;
         m_size = o.m_size;
     }
 
@@ -58,12 +113,29 @@ public:
         clear();
     }
 
-    std::optional<ElT> front() const {
-        return (m_head ? std::make_optional<ElT>(m_head->value) : std::nullopt);
+    iterator begin() const { return Iterator(m_head.get()); }
+    iterator end() const { return Iterator((*m_tail)->next.get()); }
+    const_iterator cbegin() const { return Const_Iterator(m_head.get()); }
+    const_iterator cend() const { return Const_Iterator((*m_tail)->next.get()); }
+
+    ElT& front() {
+        assert(m_head && "UB to call front when empty");
+        return m_head->value;
     }
 
-    std::optional<ElT> back() const {
-        return (*m_tail ? std::make_optional<ElT>((*m_tail)->value) : std::nullopt);
+    ElT const& front() const {
+        assert(m_head && "UB to call front when empty");
+        return m_head->value;
+    }
+
+    ElT& back() {
+        assert(*m_tail && "UB to call back when empty");
+        return (*m_tail)->value;
+    }
+
+    ElT const& back() const {
+        assert(*m_tail && "UB to call back when empty");
+        return (*m_tail)->value;
     }
 
     /**
@@ -75,8 +147,8 @@ public:
         std::swap(m_head->next, node);
         m_size++;
 
-        if (m_size == 1) {
-            m_tail = &m_head;
+        if (size() == 2) {
+            m_tail = &m_head->next;
         }
     }
 
@@ -85,8 +157,14 @@ public:
     */
     void push_back(ElT value) {
         std::unique_ptr<Node> node = std::make_unique<Node>(value);
-        (*m_tail)->next = std::move(node);
-        m_tail = &(*m_tail)->next;
+
+        if (size() == 0) {
+            *m_tail = std::move(node);
+        } else {
+            (*m_tail)->next = std::move(node);
+            m_tail = &(*m_tail)->next;
+        }
+
         m_size++;
     }
 
@@ -94,27 +172,36 @@ public:
        O(1)
     */
     void pop_front() {
+        assert(!empty());
+
         std::unique_ptr<Node> node(nullptr);
         std::swap(m_head->next, node);
         std::swap(m_head, node);
         node.reset();
         m_size--;
+
+        if (m_size <= 1) {
+            m_tail = &m_head;
+        }
     }
 
     /**
        O(n)
     */
     void pop_back() {
-        m_tail->reset();
-        std::unique_ptr<Node>* p1 = &m_head;
-        std::unique_ptr<Node>* p2 = (m_head ? &m_head.next : nullptr);
+        assert(!empty());
 
-        while (*p2) {
+        m_tail->reset();
+
+        std::unique_ptr<Node>* p1 = &m_head;
+        std::unique_ptr<Node>* p2 = (m_head ? &m_head->next : nullptr);
+        while (p2 && *p2) {
             p1 = p2;
-            p2 = &p2->next;
+            p2 = &(*p2)->next;
         }
 
         m_tail = p1;
+        m_size--;
     }
 
     /**
@@ -123,12 +210,16 @@ public:
     void remove(ElT value) {
         std::unique_ptr<Node>* cur = &m_head;
         while (*cur) {
-            if (cur->value == value) {
-                *cur = std::move(cur->next);
+            if ((*cur)->value == value) {
+                *cur = std::move((*cur)->next);
+
+                // TODO(sdsmith): tail removal (do what pop_back does)
+
+                m_size--;
                 return;
             }
 
-            cur = &cur->next;
+            cur = &(*cur)->next;
         }
     }
 
@@ -146,11 +237,13 @@ public:
        O(n)
     */
     [[nodiscard]] bool contains(ElT value) const {
-        Node* cur = &m_head;
-        while (*cur) {
+        Node* cur = m_head.get();
+        while (cur) {
             if (cur->value == value) {
                 return true;
             }
+
+            cur = cur->next.get();
         }
 
         return false;
@@ -163,7 +256,7 @@ public:
         if (m_head) {
             // Avoid stack overflow from chain destructors
             while (m_head->next) {
-                m_head = std::move(m_head->next->next);
+                m_head = std::move(m_head->next);
             }
             m_head.reset();
         }
@@ -194,7 +287,7 @@ public:
     Linked_List& operator=(Linked_List&& o) {
         clear();
         m_head = std::move(o.m_head);
-        m_tail = std::move(o.m_tail);
+        m_tail = o.m_tail;
         m_size = o.m_size;
         return *this;
     }
