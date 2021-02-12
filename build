@@ -1,22 +1,71 @@
 #!/bin/bash
+set -e
 
-BUILD_MODE=""
+# Record original working directory
+pushd . >/dev/null 2>&1
+
+function cleanup {
+    # Return to original working directory
+    popd >/dev/null 2>&1
+}
+trap cleanup EXIT
+
+# Get build mode
+BUILD_MODE="debug"
+if ! [[ -z "$1" ]]; then
+    BUILD_MODE=$1
+fi
+
+echo "========================================"
+echo "Build mode: $BUILD_MODE"
+echo "========================================"
+
+function config_debug() {
+    # Returns with working directory in the build directory
+    # Assert: in the artifacts directory
+    if [[ -d debug ]]; then
+        cd debug
+        return 0
+    fi
+
+    mkdir debug
+    cd debug
+    cmake -DCMAKE_BUILD_TYPE=Debug ../..
+    return $?
+}
+
+function config_release() {
+    # Returns with working directory in the build directory
+    # Assert: in the artifacts directory
+    if [[ -d release ]]; then
+        cd release
+        return 0
+    fi
+
+    mkdir release
+    cd release
+    cmake -DCMAKE_BUILD_TYPE=Release ../..
+    return $?
+}
+
+config_func=""
+case $BUILD_MODE in
+    "debug") config_func="config_debug" ;;
+    "release") config_func="config_release" ;;
+    *) echo "ERROR: no build type selected"; exit 1
+esac
 
 if ! [[ -d "artifacts" ]]; then
-    echo "run config.sh"
-    exit 0
+    mkdir artifacts
 fi
 
-if [[ ! -z "$1" ]] ; then
-    case "$1" in
-        "debug") BUILD_MODE="-DCMAKE_BUILD_TYPE=Debug" ;;
-    esac
-fi
-
-pushd . >/dev/null
-cd artifacts >/dev/null
-# Build: point to cache from config
-cmake $BUILD_MODE --build .
+cd artifacts
+$config_func
 RET=$?
-popd >/dev/null
-exit $RET
+if ! [[ $RET -eq 0 ]]; then
+    echo "ERROR: build configuration failed"
+    exit $RET
+fi
+
+# Perform the build
+cmake --build .
