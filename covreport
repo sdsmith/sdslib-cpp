@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DEBUG_DIR="./artifacts/debug"
+PROF_RAW_FILE="$DEBUG_DIR/sdslib.profraw"
+PROF_DATA_FILE="$DEBUG_DIR/sdslib.profdata"
+
+./build debug
+LLVM_PROFILE_FILE="$PROF_RAW_FILE" "$DEBUG_DIR/sdslib_test"
+llvm-profdata merge -sparse $PROF_RAW_FILE -o $PROF_DATA_FILE
+llvm-cov report "$DEBUG_DIR/sdslib_test" -instr-profile=$PROF_DATA_FILE
+
+echo "For line-by-line counts:"
+echo "llvm-cov show $DEBUG_DIR/sdslib_test -instr-profile=$PROF_DATA_FILE"
