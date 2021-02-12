@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert> // TODO(sdsmith): shouldn't terminate during tests. they should mark as failures.
+#include <cassert>
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
@@ -78,8 +78,6 @@ public:
        O(n)
      */
     Linked_List(Linked_List const& o) {
-        clear();
-
         std::unique_ptr<Node>* cur = &m_head;
         std::unique_ptr<Node> const* o_cur = &o.m_head;
         while (*o_cur) {
@@ -99,11 +97,13 @@ public:
        O(1)
     */
     Linked_List(Linked_List&& o) {
-        clear();
-
-        m_head = std::move(o.m_head);
         m_tail = o.m_tail;
         m_size = o.m_size;
+        m_head = std::move(o.m_head);
+
+        if (m_size <= 1) {
+            m_tail = &m_head;
+        }
     }
 
     /**
@@ -208,17 +208,27 @@ public:
        O(n)
     */
     void remove(ElT value) {
+        std::unique_ptr<Node>* prev = nullptr;
         std::unique_ptr<Node>* cur = &m_head;
         while (*cur) {
             if ((*cur)->value == value) {
-                *cur = std::move((*cur)->next);
+                // Update tail
+                if (*cur == *m_tail) {
+                    m_tail = (prev ? prev : &m_head);
+                } else if ((*cur)->next == *m_tail) {
+                    // Moving this node will invalidate our pointer to it
+                    // TODO(sdsmith): we should probably make sure that pointers to elements are not invalidated when something moves.
+                    m_tail = cur;
+                }
 
-                // TODO(sdsmith): tail removal (do what pop_back does)
+                // Remove the node
+                *cur = std::move((*cur)->next);
 
                 m_size--;
                 return;
             }
 
+            prev = cur;
             cur = &(*cur)->next;
         }
     }
@@ -268,27 +278,24 @@ public:
     Linked_List& operator=(Linked_List const& o) {
         clear();
 
-        std::unique_ptr<Node>* cur = &o.m_head;
-        int ct = o.size();
-
-        while (*cur) {
+        Node const* cur = o.m_head.get();
+        while (cur) {
             push_back(cur->value);
-
-            ct--;
-            if (ct == 0) {
-                // at the tail element
-                m_tail = *cur;
-            }
+            cur = cur->next.get();
         }
-
         return *this;
     }
 
     Linked_List& operator=(Linked_List&& o) {
         clear();
-        m_head = std::move(o.m_head);
+
         m_tail = o.m_tail;
         m_size = o.m_size;
+        m_head = std::move(o.m_head);
+
+        if (m_size <= 1) {
+            m_tail = &m_head;
+        }
         return *this;
     }
 
