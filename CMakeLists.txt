@@ -80,6 +80,7 @@ endif()
 
 set(HEADERS
   ${CMAKE_CURRENT_LIST_DIR}/src/carray.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/make_array.h
   ${CMAKE_CURRENT_LIST_DIR}/src/list/linked_list.h
 )
 
