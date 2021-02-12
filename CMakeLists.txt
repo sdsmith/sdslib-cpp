@@ -39,8 +39,11 @@ endif()
 
 ## Compiler config
 #
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # TODO(Sdsmith): gtest doesn't play well with -Wundef, -Wswitch-enum
-set(GENERIC_CXX_FLAGS "-std=c++17 -fPIC -Werror -Wall -Wextra -Weffc++ -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-overflow=4 -Wwrite-strings -Wno-unused-result")
+set(GENERIC_CXX_FLAGS "-fPIC -Werror -Wall -Wextra -Weffc++ -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-overflow=4 -Wwrite-strings -Wno-unused-result")
 # Remove noisy warnings
 set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -Wcast-qual -Wswitch-default -Wno-switch-enum -Wconversion -Wunreachable-code")
 
@@ -52,6 +55,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_CXX_FLAGS}")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_CXX_FLAGS}")
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # Include c-preprocessor debug info
+  set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -gdwarf")
 endif()
 
 ## Source
