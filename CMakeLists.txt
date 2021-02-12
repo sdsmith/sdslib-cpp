@@ -39,6 +39,9 @@ endif()
 
 ## Compiler config
 #
+
+# Generic flags
+#
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -47,20 +50,30 @@ set(GENERIC_CXX_FLAGS "-fPIC -Werror -Wall -Wextra -Weffc++ -Wfloat-equal -Wpoin
 # Remove noisy warnings
 set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -Wcast-qual -Wswitch-default -Wno-switch-enum -Wconversion -Wunreachable-code")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # Include c-preprocessor debug info
+  set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -gdwarf")
+
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Add code coverage
+    set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+  endif()
+endif()
+
+# Compiler specific flags
+#
 set(CLANG_CXX_FLAGS "${GENERIC_CXX_FLAGS}")
 
 set(GCC_CXX_FLAGS "${GENERIC_CXX_FLAGS}")
 
+# Finalize flags
+#
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_CXX_FLAGS}")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_CXX_FLAGS}")
 endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # Include c-preprocessor debug info
-  set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -gdwarf")
-endif()
 
 ## Source
 #
@@ -88,6 +101,10 @@ add_library(sdslib STATIC ${SOURCES})
 
 ## Create test executable
 #
+
+message(STATUS "CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "CMAKE_CXX_FLAGS:       ${GCC_CXX_FLAGS}")
 
 add_executable(sdslib_test ${TEST_SOURCES} ${SOURCES})
 target_link_libraries(sdslib_test gtest_main)
