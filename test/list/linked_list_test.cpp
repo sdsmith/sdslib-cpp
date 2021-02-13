@@ -33,7 +33,7 @@ TEST(Linked_List_Test, constructor) {
     EXPECT_EQ(l5.back(), 5);
 }
 
-TEST(Linked_List_Test, copy_constructed) {
+TEST(Linked_List_Test, copy_constructor) {
     {
         sds::Linked_List<int> l1;
         sds::Linked_List<int> l2(l1);
@@ -84,7 +84,7 @@ TEST(Linked_List_Test, copy_assignment) {
     }
 }
 
-TEST(Linked_List_Test, move_constructed) {
+TEST(Linked_List_Test, move_constructor) {
     {
         sds::Linked_List<int> l1;
         sds::Linked_List<int> l2(std::move(l1));

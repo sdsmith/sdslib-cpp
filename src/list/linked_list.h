@@ -7,26 +7,35 @@
 #include <optional>
 #include <memory>
 
+
 namespace sds
 {
 
-template<typename ElT>
+template<typename T>
 class Linked_List {
 public:
+    using value_type = T;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = value_type const&;
+    using pointer = value_type*;
+    using const_pointer = value_type const*;
+
     struct Node {
-        ElT value = {};
+        value_type value = {};
         std::unique_ptr<Node> next = nullptr;
 
-        Node(ElT value) : value(value) {}
+        Node(value_type value) : value(value) {}
     };
 
     class Iterator {
-        Node* m_p;
+        Node* m_p = nullptr;
 
     public:
         using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = ElT;
+        using difference_type = ptrdiff_t;
+        using value_type = T;
         using pointer = value_type*;
         using reference = value_type&;
 
@@ -43,12 +52,12 @@ public:
     };
 
     class Const_Iterator {
-        Node const* m_p;
+        Node const* m_p = nullptr;
 
     public:
         using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = ElT const;
+        using difference_type = ptrdiff_t;
+        using value_type = T const;
         using pointer = value_type*;
         using reference = value_type&;
 
@@ -64,14 +73,13 @@ public:
         friend bool operator!=(Const_Iterator const& a, Const_Iterator const& b) { return !(a == b); }
     };
 
-
     using iterator = Iterator;
     using const_iterator = Const_Iterator;
 
     Linked_List() {}
 
-    Linked_List(std::initializer_list<ElT> l) {
-        for (ElT e : l) { push_back(e); }
+    Linked_List(std::initializer_list<T> l) {
+        for (value_type e : l) { push_back(e); }
     }
 
     /**
@@ -118,22 +126,22 @@ public:
     const_iterator cbegin() const { return Const_Iterator(m_head.get()); }
     const_iterator cend() const { return Const_Iterator((*m_tail)->next.get()); }
 
-    ElT& front() {
+    reference front() {
         assert(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
-    ElT const& front() const {
+    const_reference front() const {
         assert(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
-    ElT& back() {
+    reference back() {
         assert(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
 
-    ElT const& back() const {
+    const_reference back() const {
         assert(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
@@ -141,7 +149,7 @@ public:
     /**
        O(1)
      */
-    void push_front(ElT value) {
+    void push_front(value_type value) {
         std::unique_ptr<Node> node = std::make_unique<Node>(value);
         std::swap(m_head, node);
         std::swap(m_head->next, node);
@@ -155,7 +163,7 @@ public:
     /**
        O(1)
     */
-    void push_back(ElT value) {
+    void push_back(value_type value) {
         std::unique_ptr<Node> node = std::make_unique<Node>(value);
 
         if (size() == 0) {
@@ -207,7 +215,7 @@ public:
     /**
        O(n)
     */
-    void remove(ElT value) {
+    void remove(value_type value) {
         std::unique_ptr<Node>* prev = nullptr;
         std::unique_ptr<Node>* cur = &m_head;
         while (*cur) {
@@ -241,12 +249,12 @@ public:
     /**
        O(1)
     */
-    [[nodiscard]] size_t size() const { return m_size; }
+    [[nodiscard]] size_type size() const { return m_size; }
 
     /**
        O(n)
     */
-    [[nodiscard]] bool contains(ElT value) const {
+    [[nodiscard]] bool contains(value_type value) const {
         Node* cur = m_head.get();
         while (cur) {
             if (cur->value == value) {
@@ -286,7 +294,7 @@ public:
         return *this;
     }
 
-    Linked_List& operator=(Linked_List&& o) {
+    Linked_List& operator=(Linked_List&& o) noexcept {
         clear();
 
         m_tail = o.m_tail;
@@ -302,7 +310,7 @@ public:
 private:
     std::unique_ptr<Node> m_head = nullptr;
     std::unique_ptr<Node>* m_tail = &m_head;
-    size_t m_size = 0;
+    size_type m_size = 0;
 };
 
 } // namesapce sds
