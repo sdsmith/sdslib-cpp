@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "dynamic_array.h"
+#include "array/dynamic_array.h"
 
 TEST(Dynamic_Array_Test, constructor) { FAIL(); }
 

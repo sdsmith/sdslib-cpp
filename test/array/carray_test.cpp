@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "carray.h"
+#include "array/carray.h"
 
 TEST(C_Array, size) {
     char const a[1] = {};

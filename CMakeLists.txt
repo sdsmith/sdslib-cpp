@@ -79,9 +79,9 @@ endif()
 #
 
 set(HEADERS
-  ${CMAKE_CURRENT_LIST_DIR}/src/carray.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/dynamic_array.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/make_array.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/array/carray.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/array/dynamic_array.h
+  ${CMAKE_CURRENT_LIST_DIR}/src/array/make_array.h
   ${CMAKE_CURRENT_LIST_DIR}/src/list/linked_list.h
 )
 
@@ -90,8 +90,9 @@ set(SOURCES
 )
 
 set(TEST_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/test/carray_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/test/dynamic_array_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/test/array/carray_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/test/array/dynamic_array_test.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/test/array/make_array_test.cpp
   ${CMAKE_CURRENT_LIST_DIR}/test/list/linked_list_test.cpp
 )
 
