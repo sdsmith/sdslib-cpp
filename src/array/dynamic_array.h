@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <initializer_list>
 #include <iterator>
 
@@ -73,7 +74,7 @@ public:
     using iterator = Iterator;
     using const_iterator = Const_Iterator;
 
-    Dynamic_Array();
+    Dynamic_Array() {}
     Dynamic_Array(std::initializer_list<T> l);
     Dynamic_Array(Dynamic_Array const& o);
     Dynamic_Array(Dynamic_Array&& o);
@@ -87,12 +88,28 @@ public:
     const_iterator cbegin() const { return Const_Iterator(m_data); }
     const_iterator cend() const { return Const_Iterator(m_data + m_size); }
 
-    reference front();
-    const_reference front() const;
-    reference back();
-    const_reference back() const;
-    reference data();
-    const_reference data() const;
+    reference front() {
+        assert(!empty());
+        return *m_data;
+    }
+
+    const_reference front() const {
+        assert(!empty());
+        return *m_data;
+    }
+
+    reference back() {
+        assert(!empty());
+        return m_data[m_size - 1];
+    }
+
+    const_reference back() const {
+        assert(!empty());
+        return m_data[m_size - 1];
+    }
+
+    reference data() { return m_data; }
+    const_reference data() const { return m_data; }
 
     constexpr void push_back(T const& v);
     constexpr void push_back(T&& v);
@@ -109,15 +126,28 @@ public:
     constexpr iterator erase(const_iterator pos);
     constexpr iterator erase(const_iterator first, const_iterator last);
 
-    constexpr reference at(size_type pos);
-    constexpr const_reference at(size_type pos) const;
-    /* no throw */
-    constexpr reference operator[](size_type pos);
-    constexpr const_reference operator[](size_type pos) const;
+    constexpr reference at(size_type index) noexcept(false) {
+        range_check(index);
+        return (*this)[index];
+    }
+    constexpr const_reference at(size_type index) const noexcept(false) {
+        range_check(index);
+        return (*this)[index];
+    }
 
-    constexpr bool empty() const;
-    constexpr size_t size() const;
-    constexpr size_t capacity() const;
+    constexpr reference operator[](size_type index) noexcept {
+        assert(!empty());
+        return m_data[index];
+    }
+    constexpr const_reference operator[](size_type index) const noexcept {
+        assert(!empty());
+        return m_data[index];
+    }
+
+    constexpr bool empty() const noexcept { return size() != 0; }
+    constexpr size_t size() const noexcept { return m_size; }
+    constexpr size_t capacity() const noexcept { return m_capacity; }
+
     constexpr void reserve(size_t);
     // TODO(sdsmith): shrink_to_fit
 
@@ -135,6 +165,12 @@ private:
     size_type m_capacity = 0;
     size_type m_size = 0;
     pointer m_data = nullptr;
+
+    constexpr void range_check(size_type index) const noexcept(false) {
+        if (index >= size()) {
+            throw std::out_of_range(); // TODO(sdsmith): clearer message?
+        }
+    }
 };
 
 } // namespace sds
