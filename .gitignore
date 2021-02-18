@@ -2,3 +2,5 @@ artifacts
 gdb.txt
 *.profraw
 *.profdata
+docs
+.#*
