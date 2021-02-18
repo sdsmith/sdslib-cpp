@@ -83,9 +83,9 @@ public:
     }
 
     /**
-       O(n)
+     * O(n)
      */
-    Linked_List(Linked_List const& o) {
+    Linked_List(Linked_List const& o) noexcept(false) {
         std::unique_ptr<Node>* cur = &m_head;
         std::unique_ptr<Node> const* o_cur = &o.m_head;
         while (*o_cur) {
@@ -284,6 +284,7 @@ public:
     }
 
     Linked_List& operator=(Linked_List const& o) {
+        assert(this != &o);
         clear();
 
         Node const* cur = o.m_head.get();
@@ -295,6 +296,7 @@ public:
     }
 
     Linked_List& operator=(Linked_List&& o) noexcept {
+        assert(this != &o);
         clear();
 
         m_tail = o.m_tail;
