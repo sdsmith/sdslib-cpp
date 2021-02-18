@@ -3,6 +3,8 @@
 #include <cassert>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
+#include <stdexcept>
 
 
 namespace sds
@@ -16,10 +18,11 @@ namespace sds
 */
 
 
-template<typename T>
+template<typename T, typename Allocator = std::allocator<T>>
 class Dynamic_Array {
 public:
     using value_type = T;
+    using allocator_type = Allocator;
     using size_type = size_t;
     using difference_type = ptrdiff_t;
     using reference = value_type&;
@@ -27,52 +30,52 @@ public:
     using pointer = value_type*;
     using const_pointer = value_type const*;
 
-    class Iterator {
-        pointer m_p = nullptr;
-
+    template<typename ValueT>
+    class Iterator
+    {
     public:
         // @c++20
         //using iterator_category = std::contiguous_iterator_tag;
         using iterator_category = std::random_access_iterator_tag;
         using difference_type = ptrdiff_t;
-        using value_type = T;
+        using value_type = ValueT;
         using pointer = value_type*;
         using reference = value_type&;
 
-        Iterator(pointer p) : m_p(p) {}
-        reference operator*() const { return *m_p; }
-        pointer operator->() { return m_p; }
-        Iterator& operator++() { m_p++; return *this; }
-        Iterator operator++(int) { Iterator it = *this; ++(*this); return it; }
+        constexpr Iterator(pointer p) : m_p(p) {}
+        constexpr const_reference operator*() const { return *m_p; }
+        constexpr pointer operator->() const { return m_p; }
+        constexpr Iterator& operator++() { m_p++; return *this; }
+        constexpr Iterator operator++(int) { Iterator it = *this; ++(*this); return it; }
+        constexpr Iterator operator--() { m_p--; return *this; }
+        constexpr Iterator operator--(int) { Iterator it = *this; --(*this); return it; }
 
-        friend bool operator==(Iterator const& a, Iterator const& b) { return a.m_p == b.m_p; }
-        friend bool operator!=(Iterator const& a, Iterator const& b) { return !(a == b); }
-    };
+        constexpr Iterator& operator+=(difference_type n) { m_p += n; return *this; }
+        constexpr friend Iterator operator+(Iterator const& a, difference_type n) { return Iterator(a.m_p + n); }
+        constexpr friend Iterator operator+(difference_type n, Iterator const& a) { return a + n; }
 
-    class Const_Iterator {
+        constexpr Iterator& operator-=(difference_type n) { m_p -= n; return *this; }
+        constexpr friend Iterator operator-(Iterator const& a, difference_type n) { return Iterator(a.m_p + n); }
+        constexpr friend Iterator operator-(difference_type n, Iterator const& b) { return b - n; }
+        constexpr friend difference_type operator-(Iterator const& a, Iterator const& b) { return b.m_p - a.m_p; }
+        constexpr reference operator[](difference_type n) const { return *(*this + n); }
+
+        // TODO(sdsmith): comparing pointers is _yikes_
+        constexpr friend bool operator<(Iterator const& a, Iterator const& b) { return a.m_p < b.m_p; }
+        constexpr friend bool operator>=(Iterator const& a, Iterator const& b) { return a.m_p > b.m_p; }
+        constexpr friend bool operator<=(Iterator const& a, Iterator const& b) { return a.m_p <= b.m_p; }
+        constexpr friend bool operator>(Iterator const& a, Iterator const& b) { return a.m_p >= b.m_p; }
+        constexpr friend bool operator==(Iterator const& a, Iterator const& b) { return a.m_p == b.m_p; }
+        constexpr friend bool operator!=(Iterator const& a, Iterator const& b) { return !(a == b); }
+
+    private:
         pointer m_p = nullptr;
-
-    public:
-        // @c++20
-        //using iterator_category = std::contiguous_iterator_tag;
-        using iterator_category = std::random_access_iterator_tag;
-        using difference_type = ptrdiff_t;
-        using value_type = T const;
-        using pointer = value_type*;
-        using reference = value_type&;
-
-        Const_Iterator(const_pointer p) : m_p(p) {}
-        const_reference operator*() const { return *m_p; }
-        const_pointer operator->() { return m_p; }
-        Const_Iterator& operator++() { m_p++; return *this; }
-        Const_Iterator operator++(int) { Const_Iterator it = *this; ++(*this); return it; }
-
-        friend bool operator==(Const_Iterator const& a, Const_Iterator const& b) { return a.m_p == b.m_p; }
-        friend bool operator!=(Const_Iterator const& a, Const_Iterator const& b) { return !(a == b); }
     };
 
-    using iterator = Iterator;
-    using const_iterator = Const_Iterator;
+    using iterator = Iterator<T>;
+    using const_iterator = Iterator<T const>;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     Dynamic_Array() {}
     Dynamic_Array(std::initializer_list<T> l);
@@ -80,13 +83,27 @@ public:
     Dynamic_Array(Dynamic_Array&& o);
     ~Dynamic_Array();
 
-    Dynamic_Array& operator=(Dynamic_Array const&) = delete;
-    Dynamic_Array& operator=(Dynamic_Array &&);
+    Dynamic_Array& operator=(Dynamic_Array const& o) noexcept(false); /*{
+        clear();
 
-    iterator begin() const { return Iterator(m_data); }
-    iterator end() const { return Iterator(m_data + m_size); }
-    const_iterator cbegin() const { return Const_Iterator(m_data); }
-    const_iterator cend() const { return Const_Iterator(m_data + m_size); }
+        if (capacity() < o.size()) {
+            reallocate(o.size());
+        }
+        std::copy(o.begin(), o.end(), begin());
+        }*/
+
+    Dynamic_Array& operator=(Dynamic_Array&& o) {
+        deallocate();
+
+        m_data = std::move(o.m_data);
+        m_size = o.m_size;
+        m_capacity = o.m_capacity;
+    }
+
+    iterator begin() const { return iterator(m_data); }
+    iterator end() const { return iterator(m_data + m_size); }
+    const_iterator cbegin() const { return const_iterator(m_data); }
+    const_iterator cend() const { return const_iterator(m_data + m_size); }
 
     reference front() {
         assert(!empty());
@@ -145,15 +162,23 @@ public:
     }
 
     constexpr bool empty() const noexcept { return size() != 0; }
-    constexpr size_t size() const noexcept { return m_size; }
-    constexpr size_t capacity() const noexcept { return m_capacity; }
+    constexpr size_type size() const noexcept { return m_size; }
+    constexpr size_type max_size() const noexcept { return m_max_size; }
+    constexpr size_type capacity() const noexcept { return m_capacity; }
 
     constexpr void reserve(size_t);
     // TODO(sdsmith): shrink_to_fit
 
     constexpr void swap(Dynamic_Array& o);
 
-    friend std::ostream& operator<<(std::ostream& os, Dynamic_Array const& a) {
+    friend bool operator==(Dynamic_Array<T> const& a, Dynamic_Array<T> const& b) {
+        return a.size() == b.size() && std::equal(a.cbegin(), a.cend(), b.cbegin(), b.cend());
+    }
+    friend bool operator!=(Dynamic_Array<T> const& a, Dynamic_Array<T> const& b) {
+        return !(a == b);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, Dynamic_Array<T> const& a) {
         os << "[";
         for (const_reference e : a) {
             os << e << ", ";
@@ -164,13 +189,18 @@ public:
 private:
     size_type m_capacity = 0;
     size_type m_size = 0;
+    size_type m_max_size = 0;
     pointer m_data = nullptr;
 
     constexpr void range_check(size_type index) const noexcept(false) {
         if (index >= size()) {
-            throw std::out_of_range(); // TODO(sdsmith): clearer message?
+            throw std::out_of_range("invalid container index: " + std::to_string(index)); // TODO(sdsmith): clearer message?
         }
     }
+
+    void deallocate();
+    void allocate(size_type n); // TODO(sdsmith): needed?
+    void reallocate(size_type n);
 };
 
 } // namespace sds
