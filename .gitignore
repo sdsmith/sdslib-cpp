@@ -3,4 +3,4 @@ gdb.txt
 *.profraw
 *.profdata
 docs
-.#*
+.#*/build

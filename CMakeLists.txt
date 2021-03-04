@@ -1,120 +1,122 @@
-cmake_minimum_required(VERSION 3.16)
-project(sdslib)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+project(sdslib CXX)
 
-## Googletest
-#
-# ref: https://github.com/google/googletest/blob/master/googletest/README.md
+message(STATUS "Build sdslib")
 
-# Download and unpack googletest at configure time
-configure_file(cmake/CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+# ---------------------------------------------------------------------------------------
+# Set default build to release
+# ---------------------------------------------------------------------------------------
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
 endif()
 
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-  ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-  EXCLUDE_FROM_ALL)
-
-# The gtest/gtest_main targets carry header search path
-# dependencies automatically when using CMake 2.8.11 or
-# later. Otherwise we have to add them here ourselves.
-if (CMAKE_VERSION VERSION_LESS 2.8.11)
-  include_directories("${gtest_SOURCE_DIR}/include")
-endif()
-
-## Compiler config
-#
-
-# Generic flags
-#
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# TODO(Sdsmith): gtest doesn't play well with -Wundef, -Wswitch-enum
-set(GENERIC_CXX_FLAGS "-fPIC -Werror -Wall -Wextra -Weffc++ -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-overflow=4 -Wwrite-strings -Wno-unused-result")
-# Remove noisy warnings
-set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -Wcast-qual -Wswitch-default -Wno-switch-enum -Wconversion -Wunreachable-code")
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # Include c-preprocessor debug info
-  set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -gdwarf")
-
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Add code coverage
-    set(GENERIC_CXX_FLAGS "${GENERIC_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
-  endif()
-endif()
-
-# Compiler specific flags
-#
-set(CLANG_CXX_FLAGS "${GENERIC_CXX_FLAGS}")
-
-set(GCC_CXX_FLAGS "${GENERIC_CXX_FLAGS}")
-
-# Finalize flags
-#
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_CXX_FLAGS}")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_CXX_FLAGS}")
+# ---------------------------------------------------------------------------------------
+# Set SDSLIB_MASTER_PROJECT to ON if we are building spdlog
+# ---------------------------------------------------------------------------------------
+# Check if spdlog is being used directly or via add_subdirectory, but allow overriding
+if (NOT DEFINED SDSLIB_MASTER_PROJECT)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(SDSLIB_MASTER_PROJECT ON)
+    else()
+        set(SDSLIB_MASTER_PROJECT OFF)
+    endif()
 endif()
 
 
-## Source
-#
+# ---------------------------------------------------------------------------------------
+# Compiler config
+# ---------------------------------------------------------------------------------------
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
-set(HEADERS
-  ${CMAKE_CURRENT_LIST_DIR}/src/array/carray.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/array/dynamic_array.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/array/make_array.h
-  ${CMAKE_CURRENT_LIST_DIR}/src/list/linked_list.h
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if (CMAKE_SYSTEM_NAME MATCHES "CYGWIN" OR CMAKE_SYSTEM_NAME MATCHES "MSYS")
+    set(CMAKE_CXX_EXTENSIONS ON)
+endif()
+
+if (SDSLIB_MASTER_PROJECT EQUAL ON)
+    set(cxx_flags "")
+    set(cxx_flags_debug "")
+    set(cxx_flags_release "")
+    set(exe_linker_flags "")
+    set(exe_linker_flags_debug "")
+    set(exe_linker_flags_release "")
+
+    if (NOT MSVC)
+        string(CONCAT cxx_flags
+            "-fPIC "
+            "-Werror "
+            "-Wall "
+            "-Wextra "
+            "-Weffc++ "
+            "-Wfloat-equal "
+            "-Wpointer-arith "
+            "-Wcast-align "
+            "-Wstrict-overflow=4 "
+            "-Wwrite-strings "
+            "-Wno-unused-result "
+
+            # Remove noisy warnings
+            "-Wcast-qual "
+            "-Wswitch-default "
+            "-Wno-switch-enum "
+            "-Wconversion "
+            "-Wunreachable-code "
+            )
+
+        string(CONCAT cxx_flags_debug
+            "-gdwarf "
+        )
+
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            # Add code coverage
+            string(CONCAT cxx_flags_debug
+                ${cxx_flags_debug}
+                "-fprofile-instr-generate "
+                "-fcoverage-mapping "
+            )
+        endif()
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cxx_flags}")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${cxx_flags_debug}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${cxx_flags_release}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${exe_linker_flags}")
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${exe_linker_flags_debug}")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${exe_linker_flags_release}")
+endif()
+
+option(SDSLIB_BUILD_TESTS "Build tests" OFF)
+
+message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+
+# ---------------------------------------------------------------------------------------
+# Static library (shared not supported in windows yet)
+# ---------------------------------------------------------------------------------------
+set(SDSLIB_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/src/array/carray.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/array/dynamic_array.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/array/make_array.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/list/linked_list.h
 )
 
-set(SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/src/stub.cpp # TODO(sdsmith): temp until there is actually a source file.
+set(SDSLIB_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/stub.cpp # TODO(sdsmith): temp until there is actually a source file.
 )
 
-set(TEST_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/test/array/carray_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/test/array/dynamic_array_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/test/array/make_array_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/test/list/linked_list_test.cpp
-)
+add_library(sdslib STATIC ${SDSLIB_HEADERS} ${SDSLIB_SOURCES})
+target_include_directories(sdslib PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+set_target_properties(sdslib PROPERTIES DEBUG_POSTFIX d)
 
-## Create static library
-#
-
-foreach(header ${HEADERS})
-  file(RELATIVE_PATH _header_path "${CMAKE_CURRENT_LIST_DIR}/inc" "${header}")
-  configure_file("${header}" "${PROJECT_BINARY_DIR}/out/inc/${_header_path}" COPYONLY)
-endforeach()
-add_library(sdslib STATIC ${SOURCES})
-
-## Create test executable
-#
-
-message(STATUS "CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
-message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "CMAKE_CXX_FLAGS:       ${GCC_CXX_FLAGS}")
-
-add_executable(sdslib_test ${TEST_SOURCES} ${SOURCES})
-target_link_libraries(sdslib_test gtest_main)
-target_include_directories(sdslib_test PUBLIC src)
-target_compile_definitions(sdslib_test PUBLIC WITH_GTEST)
-enable_testing()
-add_test(NAME sdslib_test COMMAND sdslib_test)
+# ---------------------------------------------------------------------------------------
+# Build binaries
+# ---------------------------------------------------------------------------------------
+if (SDSLIB_BUILD_TESTS)
+    message(STATUS "Generating tests")
+    enable_testing()
+    add_subdirectory(test)
+endif()
