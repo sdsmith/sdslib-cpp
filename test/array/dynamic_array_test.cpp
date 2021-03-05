@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "array/dynamic_array.h"
+#include "sdslib/array/dynamic_array.h"
 #include <iterator>
 
 

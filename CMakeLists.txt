@@ -89,7 +89,7 @@ if (SDSLIB_MASTER_PROJECT EQUAL ON)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${exe_linker_flags_release}")
 endif()
 
-option(SDSLIB_BUILD_TESTS "Build tests" OFF)
+option(SDSLIB_BUILD_TESTS "Build tests" ${SDSLIB_MASTER_PROJECT})
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 
@@ -97,10 +97,10 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 # Static library (shared not supported in windows yet)
 # ---------------------------------------------------------------------------------------
 set(SDSLIB_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/src/array/carray.h
-    ${CMAKE_CURRENT_LIST_DIR}/src/array/dynamic_array.h
-    ${CMAKE_CURRENT_LIST_DIR}/src/array/make_array.h
-    ${CMAKE_CURRENT_LIST_DIR}/src/list/linked_list.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/sdslib/array/carray.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/sdslib/array/dynamic_array.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/sdslib/array/make_array.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/sdslib/list/linked_list.h
 )
 
 set(SDSLIB_SOURCES
@@ -108,7 +108,7 @@ set(SDSLIB_SOURCES
 )
 
 add_library(sdslib STATIC ${SDSLIB_HEADERS} ${SDSLIB_SOURCES})
-target_include_directories(sdslib PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
+target_include_directories(sdslib PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 set_target_properties(sdslib PROPERTIES DEBUG_POSTFIX d)
 
