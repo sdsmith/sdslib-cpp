@@ -11,9 +11,9 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # ---------------------------------------------------------------------------------------
-# Set SDSLIB_MASTER_PROJECT to ON if we are building spdlog
+# Set SDSLIB_MASTER_PROJECT to ON if we are building sdslib
 # ---------------------------------------------------------------------------------------
-# Check if spdlog is being used directly or via add_subdirectory, but allow overriding
+# Check if sdslib is being used directly or via add_subdirectory, but allow overriding
 if (NOT DEFINED SDSLIB_MASTER_PROJECT)
     if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
         set(SDSLIB_MASTER_PROJECT ON)
@@ -32,7 +32,6 @@ if (NOT CMAKE_CXX_STANDARD)
 endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 if (CMAKE_SYSTEM_NAME MATCHES "CYGWIN" OR CMAKE_SYSTEM_NAME MATCHES "MSYS")
     set(CMAKE_CXX_EXTENSIONS ON)
 endif()
@@ -94,7 +93,7 @@ option(SDSLIB_BUILD_TESTS "Build tests" ${SDSLIB_MASTER_PROJECT})
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 
 # ---------------------------------------------------------------------------------------
-# Static library (shared not supported in windows yet)
+# Static library
 # ---------------------------------------------------------------------------------------
 set(SDSLIB_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/sdslib/array/carray.h
