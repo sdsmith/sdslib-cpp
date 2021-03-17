@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "sdslib/array/make_array.h"
+#include "sds/array/make_array.h"
 
 TEST(Make_Array_Test, constructor) {
     // NOTE(sdsmith): Not valid to create an empty array

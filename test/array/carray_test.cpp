@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "sdslib/array/carray.h"
+#include "sds/array/carray.h"
 
 TEST(C_Array, size) {
     char const a[1] = {};

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "sdslib/list/linked_list.h"
-#include "sdslib/array/carray.h"
+#include "sds/list/linked_list.h"
+#include "sds/array/carray.h"
 #include <vector>
 
 
