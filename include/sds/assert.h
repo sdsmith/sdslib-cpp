@@ -15,8 +15,8 @@
  * \param expr Expression.
  * \param msg Error message.
  */
-#define _ASSERT_GLUE(a, b) a##b
-#define ASSERT_GLUE(a, b) _ASSERT_GLUE(a, b)
+#define SDS_I_ASSERT_GLUE(a, b) a##b
+#define SDS_ASSERT_GLUE(a, b) _ASSERT_GLUE(a, b)
 
 #ifdef __cplusplus
 #   if __cplusplus >= 201103L // c++11
@@ -35,5 +35,5 @@
 #   endif
 #endif
 
-#undef ASSERT_GLUE
-#undef _ASSERT_GLUE
+#undef SDS_ASSERT_GLUE
+#undef SDS_I_ASSERT_GLUE
