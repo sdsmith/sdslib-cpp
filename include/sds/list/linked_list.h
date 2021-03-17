@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include "sds/details/common.h"
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
@@ -127,22 +127,22 @@ public:
     const_iterator cend() const { return Const_Iterator((*m_tail)->next.get()); }
 
     reference front() {
-        assert(m_head && "UB to call front when empty");
+        SDS_ASSERT(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
     const_reference front() const {
-        assert(m_head && "UB to call front when empty");
+        SDS_ASSERT(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
     reference back() {
-        assert(*m_tail && "UB to call back when empty");
+        SDS_ASSERT(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
 
     const_reference back() const {
-        assert(*m_tail && "UB to call back when empty");
+        SDS_ASSERT(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
 
@@ -180,7 +180,7 @@ public:
        O(1)
     */
     void pop_front() {
-        assert(!empty());
+        SDS_ASSERT(!empty());
 
         std::unique_ptr<Node> node(nullptr);
         std::swap(m_head->next, node);
@@ -197,7 +197,7 @@ public:
        O(n)
     */
     void pop_back() {
-        assert(!empty());
+        SDS_ASSERT(!empty());
 
         m_tail->reset();
 
@@ -284,7 +284,7 @@ public:
     }
 
     Linked_List& operator=(Linked_List const& o) {
-        assert(this != &o);
+        SDS_ASSERT(this != &o);
         clear();
 
         Node const* cur = o.m_head.get();
@@ -296,7 +296,7 @@ public:
     }
 
     Linked_List& operator=(Linked_List&& o) noexcept {
-        assert(this != &o);
+        SDS_ASSERT(this != &o);
         clear();
 
         m_tail = o.m_tail;

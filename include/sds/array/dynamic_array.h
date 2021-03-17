@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cassert>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -106,22 +105,22 @@ public:
     const_iterator cend() const { return const_iterator(m_data + m_size); }
 
     reference front() {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return *m_data;
     }
 
     const_reference front() const {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return *m_data;
     }
 
     reference back() {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return m_data[m_size - 1];
     }
 
     const_reference back() const {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return m_data[m_size - 1];
     }
 
@@ -153,11 +152,11 @@ public:
     }
 
     constexpr reference operator[](size_type index) noexcept {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return m_data[index];
     }
     constexpr const_reference operator[](size_type index) const noexcept {
-        assert(!empty());
+        SDS_ASSERT(!empty());
         return m_data[index];
     }
 
