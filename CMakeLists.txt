@@ -106,11 +106,12 @@ set(SDSLIB_HEADERS
 )
 
 set(SDSLIB_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/src/stub.cpp # TODO(sdsmith): temp until there is actually a source file.
+    "${CMAKE_CURRENT_LIST_DIR}/src/string.cpp"
 )
 
 add_library(sdslib STATIC ${SDSLIB_HEADERS} ${SDSLIB_SOURCES})
-target_include_directories(sdslib PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+target_include_directories(sdslib PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 set_target_properties(sdslib PROPERTIES DEBUG_POSTFIX d)
 

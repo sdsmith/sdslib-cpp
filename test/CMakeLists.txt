@@ -42,16 +42,18 @@ endif()
 # Build binaries
 # ---------------------------------------------------------------------------------------
 set(SDSLIB_TEST_SOURCES
-  ${CMAKE_CURRENT_LIST_DIR}/array/carray_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/array/dynamic_array_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/array/make_array_test.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/list/linked_list_test.cpp
+  "${CMAKE_CURRENT_LIST_DIR}/array/carray_test.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/array/dynamic_array_test.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/array/make_array_test.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/list/linked_list_test.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/string_test.cpp"
 )
 
 enable_testing()
 
 add_executable(sdslib_test ${SDSLIB_TEST_SOURCES})
+add_dependencies(sdslib_test sdslib googletest)
 target_link_libraries(sdslib_test PRIVATE sdslib gtest_main)
-target_include_directories(sdslib_test PUBLIC src)
+#target_include_directories(sdslib_test PUBLIC src)
 target_compile_definitions(sdslib_test PUBLIC WITH_GTEST)
 add_test(NAME sdslib_test COMMAND sdlib_test)
