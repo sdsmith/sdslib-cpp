@@ -52,7 +52,7 @@ set(SDSLIB_TEST_SOURCES
 enable_testing()
 
 add_executable(sdslib_test ${SDSLIB_TEST_SOURCES})
-add_dependencies(sdslib_test sdslib googletest)
+add_dependencies(sdslib_test sdslib)
 target_link_libraries(sdslib_test PRIVATE sdslib gtest_main)
 #target_include_directories(sdslib_test PUBLIC src)
 target_compile_definitions(sdslib_test PUBLIC WITH_GTEST)
