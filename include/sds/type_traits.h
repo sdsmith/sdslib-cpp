@@ -12,4 +12,11 @@ namespace sds {
 template<typename T, typename... Ts>
 struct contains : std::disjunction<std::is_same<T, Ts>...> {};
 
+/**
+ * \brief Helper for contains.
+ *
+ * \see contains
+ */
+template<typename T>
+inline constexpr bool contains_v = contains<T>::value;
 } // namespace sds
