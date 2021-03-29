@@ -29,7 +29,7 @@
         template <> class Static_Assert<true> {};
 #       define STATIC_ASSERT(expr)                                      \
            enum {                                                       \
-               ASSERT_GLUE(g_assert_fail_, __LINE__) = sizeof(Static_Assert<!!(expr)>) \
+               SDS_ASSERT_GLUE(g_assert_fail_, __LINE__) = sizeof(Static_Assert<!!(expr)>) \
            }
 #       define STATIC_ASSERT_MSG(expr, msg) STATIC_ASSERT(expr)
 #   endif
