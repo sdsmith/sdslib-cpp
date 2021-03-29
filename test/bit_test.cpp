@@ -38,6 +38,14 @@ TEST(BitTest, align_up) {
 #undef BIT_ALIGN_UP_EQ
 }
 
+TEST(BitTest, bitmask) {
+    EXPECT_EQ(sds::bitmask<32>(), ~0U);
+    EXPECT_EQ(sds::bitmask<1>(), 1U);
+    EXPECT_EQ(sds::bitmask<2>(), 0b11U);
+    EXPECT_EQ(sds::bitmask<4>(), 0xFU);
+    EXPECT_EQ(sds::bitmask<9>(), 0x1FFU);
+}
+
 TEST(BitTest, bit_size) {
     EXPECT_EQ(sds::bit_size<char>(), 8);
     EXPECT_EQ(sds::bit_size<int32_t>(), 32);

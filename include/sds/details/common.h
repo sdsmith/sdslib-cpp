@@ -9,3 +9,5 @@
  */
 #   define SDS_ASSERT(x) assert(x)
 #endif
+
+#include "sds/details/types.h"
