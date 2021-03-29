@@ -3,7 +3,7 @@
 #include "sds/bit.h"
 #include "sds/const.h"
 
-TEST(Bit, align_up) {
+TEST(BitTest, align_up) {
 #define BIT_ALIGN_UP_EQ(Bits, Type, Val) \
     EXPECT_EQ(sds::bit_align_up(Bits, sizeof(Type)), Val);    \
     EXPECT_EQ(sds::bit_align_up<Type>(Bits), Val);
@@ -36,4 +36,10 @@ TEST(Bit, align_up) {
 
 #undef BYTE_ALIGN_UP_EQ
 #undef BIT_ALIGN_UP_EQ
+}
+
+TEST(BitTest, bit_size) {
+    EXPECT_EQ(sds::bit_size<char>(), 8);
+    EXPECT_EQ(sds::bit_size<int32_t>(), 32);
+    EXPECT_EQ(sds::bit_size<int64_t>(), 64);
 }
