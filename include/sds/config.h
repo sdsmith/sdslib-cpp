@@ -12,3 +12,11 @@
  */
 #define SDS_USE_RTTI_FEATURES 0
 #endif
+
+#ifndef SDS_USE_COMPILER_BUILTINS
+/*
+ * \def SDS_USE_COMPILER_BUILTINS
+ * \brief Use compiler builtins where available instead of hand rolled implementations.
+ */
+#define SDS_USE_COMPILER_BUILTINS 1
+#endif

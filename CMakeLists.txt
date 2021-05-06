@@ -111,6 +111,7 @@ set(SDSLIB_HEADERS
 )
 
 set(SDSLIB_SOURCES
+    "${CMAKE_CURRENT_LIST_DIR}/src/bit.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/lockless.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/string.cpp"
 )
