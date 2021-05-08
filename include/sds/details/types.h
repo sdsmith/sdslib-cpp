@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 namespace sds
@@ -20,6 +21,8 @@ using f32 = float;
 using f64 = double;
 
 using sz = s32; /** Size type (size_t equivalent) */
+using ptrdiff = std::ptrdiff_t;
+using byte = std::byte;
 
 constexpr auto operator""_KB(u64 s) { return s * 1024; }
 
