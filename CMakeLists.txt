@@ -106,8 +106,8 @@ set(SDSLIB_HEADERS
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/config.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/details/common.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/intrinsics.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/sds/list/linked_list.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/lockless.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sds/s_list.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/string.h"
 )
 

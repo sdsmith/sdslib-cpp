@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "sds/list/linked_list.h"
+#include "sds/s_list.h"
 
 #include "sds/array/carray.h"
 #include <vector>
