@@ -1,22 +1,35 @@
-/*
+#pragma once
+
+/**
  * \file config.h
  * \brief Library configuration.
  */
 
-#ifndef SDS_USE_RTTI_FEATURES
-/*
+/**
  * \def SDS_USE_RTTI_FEATURES
  * \brief Enable runtime type info (RTTI) dependent parts of the library.
  *
  * Expensive. Off by default.
  */
-#define SDS_USE_RTTI_FEATURES 0
+#ifndef SDS_USE_RTTI_FEATURES
+#    define SDS_USE_RTTI_FEATURES 0
 #endif
 
-#ifndef SDS_USE_COMPILER_BUILTINS
-/*
+/**
  * \def SDS_USE_COMPILER_BUILTINS
  * \brief Use compiler builtins where available instead of hand rolled implementations.
  */
-#define SDS_USE_COMPILER_BUILTINS 1
+#ifndef SDS_USE_COMPILER_BUILTINS
+#    define SDS_USE_COMPILER_BUILTINS 1
+#endif
+
+/**
+ * \def SDS_INCLUDE_CPPSTD_FEATURES
+ * \brief Include features that would only be relevant if using the C++ Standard Library and are not
+ * required by the library implementation.
+ *
+ * Disable if not using the standard library or the standard template library.
+ */
+#if SDS_INCLUDE_CPPSTD_FEATURES
+#    define SDS_INCLUDE_CPPSTD_FEATURES 1
 #endif
