@@ -4,15 +4,13 @@
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
-#include <optional>
 #include <memory>
-
+#include <optional>
 
 namespace sds
 {
-
-template<typename T>
-class Linked_List {
+template <typename T>
+class S_List {
 public:
     using value_type = T;
     using size_type = size_t;
@@ -43,9 +41,18 @@ public:
         reference operator*() const { return m_p->value; }
         pointer operator->() { return &m_p->value; }
         // prefix inc
-        Iterator& operator++() { m_p = m_p->next.get(); return *this; }
+        Iterator& operator++()
+        {
+            m_p = m_p->next.get();
+            return *this;
+        }
         // postfix inc
-        Iterator operator++(int) { Iterator it = *this; ++(*this); return it; }
+        Iterator operator++(int)
+        {
+            Iterator it = *this;
+            ++(*this);
+            return it;
+        }
 
         friend bool operator==(Iterator const& a, Iterator const& b) { return a.m_p == b.m_p; }
         friend bool operator!=(Iterator const& a, Iterator const& b) { return !(a == b); }
@@ -65,27 +72,44 @@ public:
         reference operator*() const { return m_p->value; }
         pointer operator->() { return &m_p->value; }
         // prefix inc
-        Const_Iterator& operator++() { m_p = m_p->next.get(); return *this; }
+        Const_Iterator& operator++()
+        {
+            m_p = m_p->next.get();
+            return *this;
+        }
         // postfix inc
-        Const_Iterator operator++(int) { Const_Iterator it = *this; ++(*this); return it; }
+        Const_Iterator operator++(int)
+        {
+            Const_Iterator it = *this;
+            ++(*this);
+            return it;
+        }
 
-        friend bool operator==(Const_Iterator const& a, Const_Iterator const& b) { return a.m_p == b.m_p; }
-        friend bool operator!=(Const_Iterator const& a, Const_Iterator const& b) { return !(a == b); }
+        friend bool operator==(Const_Iterator const& a, Const_Iterator const& b)
+        {
+            return a.m_p == b.m_p;
+        }
+        friend bool operator!=(Const_Iterator const& a, Const_Iterator const& b)
+        {
+            return !(a == b);
+        }
     };
 
     using iterator = Iterator;
     using const_iterator = Const_Iterator;
 
-    Linked_List() {}
+    S_List() {}
 
-    Linked_List(std::initializer_list<T> l) {
+    S_List(std::initializer_list<T> l)
+    {
         for (value_type e : l) { push_back(e); }
     }
 
     /**
      * O(n)
      */
-    Linked_List(Linked_List const& o) noexcept(false) {
+    S_List(S_List const& o) noexcept(false)
+    {
         std::unique_ptr<Node>* cur = &m_head;
         std::unique_ptr<Node> const* o_cur = &o.m_head;
         while (*o_cur) {
@@ -104,44 +128,45 @@ public:
     /**
        O(1)
     */
-    Linked_List(Linked_List&& o) {
+    S_List(S_List&& o)
+    {
         m_tail = o.m_tail;
         m_size = o.m_size;
         m_head = std::move(o.m_head);
 
-        if (m_size <= 1) {
-            m_tail = &m_head;
-        }
+        if (m_size <= 1) { m_tail = &m_head; }
     }
 
     /**
        O(n)
     */
-    ~Linked_List() {
-        clear();
-    }
+    ~S_List() { clear(); }
 
     iterator begin() const { return Iterator(m_head.get()); }
     iterator end() const { return Iterator((*m_tail)->next.get()); }
     const_iterator cbegin() const { return Const_Iterator(m_head.get()); }
     const_iterator cend() const { return Const_Iterator((*m_tail)->next.get()); }
 
-    reference front() {
+    reference front()
+    {
         SDS_ASSERT(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
-    const_reference front() const {
+    const_reference front() const
+    {
         SDS_ASSERT(m_head && "UB to call front when empty");
         return m_head->value;
     }
 
-    reference back() {
+    reference back()
+    {
         SDS_ASSERT(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
 
-    const_reference back() const {
+    const_reference back() const
+    {
         SDS_ASSERT(*m_tail && "UB to call back when empty");
         return (*m_tail)->value;
     }
@@ -149,21 +174,21 @@ public:
     /**
        O(1)
      */
-    void push_front(value_type value) {
+    void push_front(value_type value)
+    {
         std::unique_ptr<Node> node = std::make_unique<Node>(value);
         std::swap(m_head, node);
         std::swap(m_head->next, node);
         m_size++;
 
-        if (size() == 2) {
-            m_tail = &m_head->next;
-        }
+        if (size() == 2) { m_tail = &m_head->next; }
     }
 
     /**
        O(1)
     */
-    void push_back(value_type value) {
+    void push_back(value_type value)
+    {
         std::unique_ptr<Node> node = std::make_unique<Node>(value);
 
         if (size() == 0) {
@@ -179,7 +204,8 @@ public:
     /**
        O(1)
     */
-    void pop_front() {
+    void pop_front()
+    {
         SDS_ASSERT(!empty());
 
         std::unique_ptr<Node> node(nullptr);
@@ -188,15 +214,14 @@ public:
         node.reset();
         m_size--;
 
-        if (m_size <= 1) {
-            m_tail = &m_head;
-        }
+        if (m_size <= 1) { m_tail = &m_head; }
     }
 
     /**
        O(n)
     */
-    void pop_back() {
+    void pop_back()
+    {
         SDS_ASSERT(!empty());
 
         m_tail->reset();
@@ -215,7 +240,8 @@ public:
     /**
        O(n)
     */
-    void remove(value_type value) {
+    void remove(value_type value)
+    {
         std::unique_ptr<Node>* prev = nullptr;
         std::unique_ptr<Node>* cur = &m_head;
         while (*cur) {
@@ -225,7 +251,8 @@ public:
                     m_tail = (prev ? prev : &m_head);
                 } else if ((*cur)->next == *m_tail) {
                     // Moving this node will invalidate our pointer to it
-                    // TODO(sdsmith): we should probably make sure that pointers to elements are not invalidated when something moves.
+                    // TODO(sdsmith): we should probably make sure that pointers to elements are not
+                    // invalidated when something moves.
                     m_tail = cur;
                 }
 
@@ -254,12 +281,11 @@ public:
     /**
        O(n)
     */
-    [[nodiscard]] bool contains(value_type value) const {
+    [[nodiscard]] bool contains(value_type value) const
+    {
         Node* cur = m_head.get();
         while (cur) {
-            if (cur->value == value) {
-                return true;
-            }
+            if (cur->value == value) { return true; }
 
             cur = cur->next.get();
         }
@@ -270,12 +296,11 @@ public:
     /**
        O(n)
     */
-    void clear() noexcept {
+    void clear() noexcept
+    {
         if (m_head) {
             // Avoid stack overflow from chain destructors
-            while (m_head->next) {
-                m_head = std::move(m_head->next);
-            }
+            while (m_head->next) { m_head = std::move(m_head->next); }
             m_head.reset();
         }
 
@@ -283,7 +308,8 @@ public:
         m_size = 0;
     }
 
-    Linked_List& operator=(Linked_List const& o) {
+    S_List& operator=(S_List const& o)
+    {
         SDS_ASSERT(this != &o);
         clear();
 
@@ -295,7 +321,8 @@ public:
         return *this;
     }
 
-    Linked_List& operator=(Linked_List&& o) noexcept {
+    S_List& operator=(S_List&& o) noexcept
+    {
         SDS_ASSERT(this != &o);
         clear();
 
@@ -303,9 +330,7 @@ public:
         m_size = o.m_size;
         m_head = std::move(o.m_head);
 
-        if (m_size <= 1) {
-            m_tail = &m_head;
-        }
+        if (m_size <= 1) { m_tail = &m_head; }
         return *this;
     }
 
@@ -315,4 +340,4 @@ private:
     size_type m_size = 0;
 };
 
-} // namesapce sds
+} // namespace sds

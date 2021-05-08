@@ -1,48 +1,50 @@
 #include "gtest/gtest.h"
 
 #include "sds/list/linked_list.h"
+
 #include "sds/array/carray.h"
 #include <vector>
 
-
-TEST(Linked_List_Test, constructor) {
-    sds::Linked_List<int> l1;
+TEST(S_List_Test, constructor)
+{
+    sds::S_List<int> l1;
     EXPECT_EQ(l1.size(), 0U);
     EXPECT_TRUE(l1.empty());
 
-    sds::Linked_List<int> l2{};
+    sds::S_List<int> l2{};
     EXPECT_EQ(l2.size(), 0U);
     EXPECT_TRUE(l2.empty());
 
-    sds::Linked_List<int> l3{1};
+    sds::S_List<int> l3{1};
     EXPECT_EQ(l3.size(), 1U);
     EXPECT_FALSE(l3.empty());
     EXPECT_EQ(l3.front(), 1);
     EXPECT_EQ(l3.back(), 1);
 
-    sds::Linked_List<int> l4{1, 2};
+    sds::S_List<int> l4{1, 2};
     EXPECT_EQ(l4.size(), 2U);
     EXPECT_FALSE(l4.empty());
     EXPECT_EQ(l4.front(), 1);
     EXPECT_EQ(l4.back(), 2);
 
-    sds::Linked_List<int> l5{1, 2, 3, 4, 5};
+    sds::S_List<int> l5{1, 2, 3, 4, 5};
     EXPECT_EQ(l5.size(), 5U);
     EXPECT_FALSE(l5.empty());
     EXPECT_EQ(l5.front(), 1);
     EXPECT_EQ(l5.back(), 5);
 }
 
-TEST(Linked_List_Test, copy_constructor) {
+TEST(S_List_Test, copy_constructor)
+{
     {
-        sds::Linked_List<int> l1;
-        sds::Linked_List<int> l2(l1);
+        sds::S_List<int> l1;
+        sds::S_List<int> l2(l1);
         EXPECT_TRUE(l2.empty());
     }
 
     {
-        sds::Linked_List<int> l1{1};
-        sds::Linked_List<int> l2(l1);
+        sds::S_List<int> l1{1};
+        sds::S_List<int> l2(l1);
         EXPECT_FALSE(l2.empty());
         EXPECT_EQ(l2.size(), 1U);
         EXPECT_EQ(l2.front(), 1);
@@ -50,8 +52,8 @@ TEST(Linked_List_Test, copy_constructor) {
     }
 
     {
-        sds::Linked_List<int> l1{1, 2, 3, 4, 5};
-        sds::Linked_List<int> l2(l1);
+        sds::S_List<int> l1{1, 2, 3, 4, 5};
+        sds::S_List<int> l2(l1);
         ASSERT_EQ(l1.size(), 5);
         EXPECT_EQ(l1.size(), l2.size());
         ASSERT_FALSE(l1.empty());
@@ -61,15 +63,16 @@ TEST(Linked_List_Test, copy_constructor) {
     }
 }
 
-TEST(Linked_List_Test, copy_assignment) {
-    sds::Linked_List<int> l1{1};
-    sds::Linked_List<int> l2 = l1;
+TEST(S_List_Test, copy_assignment)
+{
+    sds::S_List<int> l1{1};
+    sds::S_List<int> l2 = l1;
     EXPECT_FALSE(l2.empty());
     EXPECT_EQ(l2.size(), 1U);
     EXPECT_EQ(l2.front(), 1);
     EXPECT_EQ(l2.back(), 1);
 
-    sds::Linked_List<int> l3{1, 3, 4, 5, 6};
+    sds::S_List<int> l3{1, 3, 4, 5, 6};
     l2 = l3;
     EXPECT_FALSE(l2.empty());
     EXPECT_EQ(l2.size(), 5U);
@@ -84,17 +87,18 @@ TEST(Linked_List_Test, copy_assignment) {
     }
 }
 
-TEST(Linked_List_Test, move_constructor) {
+TEST(S_List_Test, move_constructor)
+{
     {
-        sds::Linked_List<int> l1;
-        sds::Linked_List<int> l2(std::move(l1));
+        sds::S_List<int> l1;
+        sds::S_List<int> l2(std::move(l1));
         EXPECT_EQ(l2.size(), 0U);
         EXPECT_TRUE(l2.empty());
     }
 
     {
-        sds::Linked_List<int> l1{1};
-        sds::Linked_List<int> l2(std::move(l1));
+        sds::S_List<int> l1{1};
+        sds::S_List<int> l2(std::move(l1));
         EXPECT_EQ(l2.size(), 1U);
         EXPECT_FALSE(l2.empty());
         EXPECT_EQ(l2.front(), 1);
@@ -102,8 +106,8 @@ TEST(Linked_List_Test, move_constructor) {
     }
 
     {
-        sds::Linked_List<int> l1{0, 1, 2};
-        sds::Linked_List<int> l2(std::move(l1));
+        sds::S_List<int> l1{0, 1, 2};
+        sds::S_List<int> l2(std::move(l1));
         EXPECT_EQ(l2.size(), 3U);
         EXPECT_FALSE(l2.empty());
         EXPECT_EQ(l2.front(), 0);
@@ -111,15 +115,16 @@ TEST(Linked_List_Test, move_constructor) {
     }
 }
 
-TEST(Linked_List_Test, move_assignment) {
-    sds::Linked_List<int> l1{1};
-    sds::Linked_List<int> l2 = std::move(l1);
+TEST(S_List_Test, move_assignment)
+{
+    sds::S_List<int> l1{1};
+    sds::S_List<int> l2 = std::move(l1);
     EXPECT_FALSE(l2.empty());
     EXPECT_EQ(l2.size(), 1U);
     EXPECT_EQ(l2.front(), 1);
     EXPECT_EQ(l2.back(), 1);
 
-    sds::Linked_List<int> l3{1, 3, 4, 5, 6};
+    sds::S_List<int> l3{1, 3, 4, 5, 6};
     l1 = l3;
     l2 = std::move(l3);
     EXPECT_FALSE(l2.empty());
@@ -135,29 +140,31 @@ TEST(Linked_List_Test, move_assignment) {
     }
 }
 
-TEST(Linked_List_Test, clear) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, clear)
+{
+    sds::S_List<int> l;
     l.clear();
     EXPECT_TRUE(l.empty());
     EXPECT_EQ(l.size(), 0U);
 
-    l = sds::Linked_List<int>{1};
+    l = sds::S_List<int>{1};
     l.clear();
     EXPECT_TRUE(l.empty());
     EXPECT_EQ(l.size(), 0U);
 
-    l = sds::Linked_List<int>{9, 8, 17, 3, 5};
+    l = sds::S_List<int>{9, 8, 17, 3, 5};
     l.clear();
     EXPECT_TRUE(l.empty());
     EXPECT_EQ(l.size(), 0U);
 }
 
-TEST(Linked_List_Test, empty) {
-    sds::Linked_List<int> l1;
+TEST(S_List_Test, empty)
+{
+    sds::S_List<int> l1;
     EXPECT_TRUE(l1.empty());
-    sds::Linked_List<int> l2{1};
+    sds::S_List<int> l2{1};
     EXPECT_FALSE(l2.empty());
-    sds::Linked_List<int> l3{1, 2, 3};
+    sds::S_List<int> l3{1, 2, 3};
     EXPECT_FALSE(l3.empty());
 
     l2.pop_back();
@@ -170,17 +177,19 @@ TEST(Linked_List_Test, empty) {
     EXPECT_TRUE(l3.empty());
 }
 
-TEST(Linked_List_Test, size) {
-    sds::Linked_List<int> l1;
+TEST(S_List_Test, size)
+{
+    sds::S_List<int> l1;
     EXPECT_EQ(l1.size(), 0U);
-    sds::Linked_List<int> l2{1};
+    sds::S_List<int> l2{1};
     EXPECT_EQ(l2.size(), 1U);
-    sds::Linked_List<int> l3{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    sds::S_List<int> l3{1, 2, 3, 4, 5, 6, 7, 8, 9};
     EXPECT_EQ(l3.size(), 9U);
 }
 
-TEST(Linked_List_Test, push_front) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, push_front)
+{
+    sds::S_List<int> l;
     l.push_front(1);
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 1U);
@@ -198,9 +207,9 @@ TEST(Linked_List_Test, push_front) {
     EXPECT_EQ(l.back(), 1);
 }
 
-
-TEST(Linked_List_Test, push_back) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, push_back)
+{
+    sds::S_List<int> l;
     l.push_back(1);
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 1U);
@@ -218,16 +227,17 @@ TEST(Linked_List_Test, push_back) {
     EXPECT_EQ(l.back(), 3);
 }
 
-TEST(Linked_List_Test, pop_front) {
+TEST(S_List_Test, pop_front)
+{
     {
-        sds::Linked_List<int> l{1};
+        sds::S_List<int> l{1};
         l.pop_front();
         EXPECT_EQ(l.size(), 0U);
         EXPECT_TRUE(l.empty());
     }
 
     {
-        sds::Linked_List<int> l{1, 2, 3};
+        sds::S_List<int> l{1, 2, 3};
 
         l.pop_front();
         EXPECT_EQ(l.size(), 2U);
@@ -245,16 +255,17 @@ TEST(Linked_List_Test, pop_front) {
     }
 }
 
-TEST(Linked_List_Test, pop_back) {
+TEST(S_List_Test, pop_back)
+{
     {
-        sds::Linked_List<int> l{1};
+        sds::S_List<int> l{1};
         l.pop_back();
         EXPECT_EQ(l.size(), 0U);
         EXPECT_TRUE(l.empty());
     }
 
     {
-        sds::Linked_List<int> l{1, 2, 3};
+        sds::S_List<int> l{1, 2, 3};
 
         l.pop_back();
         EXPECT_EQ(l.size(), 2U);
@@ -272,8 +283,9 @@ TEST(Linked_List_Test, pop_back) {
     }
 }
 
-TEST(Linked_List_Test, modify_front) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, modify_front)
+{
+    sds::S_List<int> l;
     l.push_front(1);
     l.pop_front();
     EXPECT_TRUE(l.empty());
@@ -295,8 +307,9 @@ TEST(Linked_List_Test, modify_front) {
     EXPECT_TRUE(l.empty());
 }
 
-TEST(Linked_List_Test, modify_back) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, modify_back)
+{
+    sds::S_List<int> l;
     l.push_back(1);
     l.pop_back();
     EXPECT_TRUE(l.empty());
@@ -318,8 +331,9 @@ TEST(Linked_List_Test, modify_back) {
     EXPECT_TRUE(l.empty());
 }
 
-TEST(Linked_List_Test, modify) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, modify)
+{
+    sds::S_List<int> l;
     l.push_back(1);
     l.pop_front();
     EXPECT_TRUE(l.empty());
@@ -350,8 +364,9 @@ TEST(Linked_List_Test, modify) {
     EXPECT_TRUE(l.empty());
 }
 
-TEST(Linked_List_Test, remove) {
-    sds::Linked_List<int> l{10, 3, 16, 4, 7, 8, 4, 1};
+TEST(S_List_Test, remove)
+{
+    sds::S_List<int> l{10, 3, 16, 4, 7, 8, 4, 1};
 
     // Remove front
     l.remove(10);
@@ -445,8 +460,9 @@ TEST(Linked_List_Test, remove) {
     EXPECT_EQ(l.size(), 0U);
 }
 
-TEST(Linked_List_Test, contains) {
-    sds::Linked_List<int> l;
+TEST(S_List_Test, contains)
+{
+    sds::S_List<int> l;
     EXPECT_FALSE(l.contains(0));
     l.push_back(1);
     EXPECT_TRUE(l.contains(1));
@@ -467,8 +483,9 @@ TEST(Linked_List_Test, contains) {
     EXPECT_FALSE(l.contains(2));
 }
 
-TEST(Linked_List_Test, iterator) {
-    sds::Linked_List<int> l1{0, 1, 2, 3, 4, 5};
+TEST(S_List_Test, iterator)
+{
+    sds::S_List<int> l1{0, 1, 2, 3, 4, 5};
     EXPECT_EQ(*l1.begin(), 0);
     EXPECT_EQ(std::distance(l1.begin(), l1.end()), 6);
     // Ensure that the STL range functions work
@@ -476,12 +493,7 @@ TEST(Linked_List_Test, iterator) {
 
     {
         auto it = l1.begin();
-        for (int n = 0;
-             static_cast<size_t>(n) < l1.size();
-             n++, it++)
-        {
-            EXPECT_EQ(*it, n);
-        }
+        for (int n = 0; static_cast<size_t>(n) < l1.size(); n++, it++) { EXPECT_EQ(*it, n); }
         ASSERT_EQ(it, l1.end());
     }
 
@@ -494,8 +506,9 @@ TEST(Linked_List_Test, iterator) {
     }
 }
 
-TEST(Linked_List_Test, const_iterator) {
-    sds::Linked_List<int> l1{0, 1, 2, 3, 4, 5};
+TEST(S_List_Test, const_iterator)
+{
+    sds::S_List<int> l1{0, 1, 2, 3, 4, 5};
     EXPECT_EQ(*l1.cbegin(), 0);
     EXPECT_EQ(std::distance(l1.cbegin(), l1.cend()), 6);
     // Ensure that the STL range functions work
@@ -503,12 +516,7 @@ TEST(Linked_List_Test, const_iterator) {
 
     {
         auto it = l1.cbegin();
-        for (int n = 0;
-             static_cast<size_t>(n) < l1.size();
-             n++, it++)
-        {
-            EXPECT_EQ(*it, n);
-        }
+        for (int n = 0; static_cast<size_t>(n) < l1.size(); n++, it++) { EXPECT_EQ(*it, n); }
         ASSERT_EQ(it, l1.cend());
     }
 
@@ -522,37 +530,31 @@ TEST(Linked_List_Test, const_iterator) {
     }
 }
 
-TEST(Linked_List_Test, modify_through_iterator) {
-    sds::Linked_List<int> l1{1, 2, 3, 4, 5};
+TEST(S_List_Test, modify_through_iterator)
+{
+    sds::S_List<int> l1{1, 2, 3, 4, 5};
 
-    for (auto it = l1.begin(); it != l1.end(); it++) {
-        *it += 1;
-    }
+    for (auto it = l1.begin(); it != l1.end(); it++) { *it += 1; }
 
     int n = 2;
-    for (auto it = l1.begin();
-         it != l1.end();
-         it++, n++)
-    {
-        EXPECT_EQ(*it, n);
-    }
+    for (auto it = l1.begin(); it != l1.end(); it++, n++) { EXPECT_EQ(*it, n); }
 }
 
 struct Foo {
     int n = 0;
     Foo(int n) : n(n) {}
     Foo(Foo const& o) : n(o.n) {}
-    friend bool operator==(Foo const& a, Foo const& b) {
-        return a.n == b.n;
-    }
-    friend std::ostream& operator<<(std::ostream& os, Foo const& a) {
+    friend bool operator==(Foo const& a, Foo const& b) { return a.n == b.n; }
+    friend std::ostream& operator<<(std::ostream& os, Foo const& a)
+    {
         return os << "Foo(" << a.n << ")";
     }
 };
 
-TEST(Linked_List_Test, non_pod_element) {
-    sds::Linked_List<Foo> l1{Foo(0), Foo(1), Foo(2)};
-    sds::Linked_List<Foo> l2(std::move(l1));
+TEST(S_List_Test, non_pod_element)
+{
+    sds::S_List<Foo> l1{Foo(0), Foo(1), Foo(2)};
+    sds::S_List<Foo> l2(std::move(l1));
     EXPECT_EQ(l2.front(), Foo(0));
     EXPECT_EQ(l2.back(), Foo(2));
     EXPECT_EQ(l2.size(), 3U);
@@ -570,5 +572,4 @@ TEST(Linked_List_Test, non_pod_element) {
     for (int i = 0; it1 != l1.cend(); ++it1, ++it2, ++i) {
         EXPECT_EQ(*it1, *it2) << "on loop " << i;
     }
-
 }
