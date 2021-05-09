@@ -33,3 +33,11 @@
 #if SDS_INCLUDE_CPPSTD_FEATURES
 #    define SDS_INCLUDE_CPPSTD_FEATURES 1
 #endif
+
+/**
+ * \def SDS_USE_STD_ITERATOR_CATEGORIES
+ * \brief Use C++ standard library iterator categories.
+ */
+#ifndef SDS_USE_STD_ITERATOR_CATEGORIES
+#    define SDS_USE_STD_ITERATOR_CATEGORIES 0
+#endif
