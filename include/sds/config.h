@@ -30,7 +30,7 @@
  *
  * Disable if not using the standard library or the standard template library.
  */
-#if SDS_INCLUDE_CPPSTD_FEATURES
+#ifndef SDS_INCLUDE_CPPSTD_FEATURES
 #    define SDS_INCLUDE_CPPSTD_FEATURES 1
 #endif
 
