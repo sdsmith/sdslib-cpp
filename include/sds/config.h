@@ -39,5 +39,5 @@
  * \brief Use C++ standard library iterator categories.
  */
 #ifndef SDS_USE_STD_ITERATOR_CATEGORIES
-#    define SDS_USE_STD_ITERATOR_CATEGORIES 0
+#    define SDS_USE_STD_ITERATOR_CATEGORIES 1
 #endif
