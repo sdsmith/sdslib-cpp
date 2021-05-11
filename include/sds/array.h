@@ -106,6 +106,18 @@ public:
 };
 
 template <typename T, sz N>
+constexpr void fill(T v) noexcept(std::is_nothrow_constructible_v<T>)
+{
+    for (sz i = 0; i < N; ++i) { m_arr[i] = v; }
+}
+
+template <typename T, sz N>
+constexpr void swap(Array<T, N>& o) noexcept(std::is_nothrow_swappable_v<value_type>)
+{
+    sds::swap_ranges(&m_arr[0], &m_arr[N], &o.m_arr[0]);
+}
+
+template <typename T, sz N>
 constexpr bool operator==(Array<T, N> const& a,
                           Array<T, N> const& b) noexcept(noexcept(sds::equal(a, b)))
 {
