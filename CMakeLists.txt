@@ -111,6 +111,7 @@ set(SDSLIB_HEADERS
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/move.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/s_list.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/string.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sds/swap.h"
 )
 
 set(SDSLIB_SOURCES
