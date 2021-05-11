@@ -10,7 +10,7 @@ namespace sds
  * ref: https://en.cppreference.com/w/cpp/utility/move
  */
 template <typename T>
-typename std::remove_reference_t<T>&& move(T&& t) noexcept
+constexpr typename std::remove_reference_t<T>&& move(T&& t) noexcept
 {
     return static_cast<typename std::remove_reference_t<T>&&>(t);
 }
