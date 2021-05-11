@@ -63,7 +63,7 @@ public:
     Array(Array<T, N>&&) = delete;
 
     constexpr void fill(T v) noexcept(std::is_nothrow_constructible_v<T>);
-    constexpr void swap(Array<T, N>& o) noexcept;
+    constexpr void swap(Array<T, N>& o) noexcept(std::is_nothrow_swappable_v<value_type>);
 
     [[nodiscard]] constexpr reference operator[](sz pos) noexcept { return m_arr[pos]; }
     [[nodiscard]] constexpr const_reference operator[](sz pos) const noexcept
@@ -106,13 +106,13 @@ public:
 };
 
 template <typename T, sz N>
-constexpr void fill(T v) noexcept(std::is_nothrow_constructible_v<T>)
+constexpr void Array<T, N>::fill(T v) noexcept(std::is_nothrow_constructible_v<T>)
 {
     for (sz i = 0; i < N; ++i) { m_arr[i] = v; }
 }
 
 template <typename T, sz N>
-constexpr void swap(Array<T, N>& o) noexcept(std::is_nothrow_swappable_v<value_type>)
+constexpr void Array<T, N>::swap(Array<T, N>& o) noexcept(std::is_nothrow_swappable_v<value_type>)
 {
     sds::swap_ranges(&m_arr[0], &m_arr[N], &o.m_arr[0]);
 }
