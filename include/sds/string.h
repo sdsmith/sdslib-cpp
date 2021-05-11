@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sds/details/common.h"
+#include <string>
 
 namespace sds
 {
@@ -72,5 +73,8 @@ bool ascii_cmp(char const* s, char const* ascii, s32 len) noexcept;
  * \param ascii Ascii string.
  */
 bool ascii_cmp(char const* s, char const* ascii) noexcept;
+
+// TODO(sdsmith):
+using String = std::string;
 
 } // namespace sds
