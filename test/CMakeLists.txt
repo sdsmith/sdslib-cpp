@@ -42,6 +42,7 @@ endif()
 # Build binaries
 # ---------------------------------------------------------------------------------------
 set(SDSLIB_TEST_SOURCES
+  "${CMAKE_CURRENT_LIST_DIR}/array_test.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/array/carray_test.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/array/dynamic_array_test.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/array/make_array_test.cpp"
