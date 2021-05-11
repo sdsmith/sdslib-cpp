@@ -101,6 +101,7 @@ set(SDSLIB_HEADERS
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/dynamic_array.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/make_array.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/bit.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sds/bitarray.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/bitfield.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/comparison.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/config.h"
