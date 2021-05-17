@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sds/details/common.h"
 #include "sds/move.h"
 #include <type_traits>
 
@@ -9,6 +10,8 @@ template <typename T>
 constexpr void swap(T& a, T& b) noexcept(
     std::is_nothrow_move_constructible_v<T>&& std::is_nothrow_move_assignable_v<T>)
 {
+    if SDS_UNLIKELY(&a == &b) { return; }
+
     T tmp(sds::move(a));
     a = sds::move(b);
     b = sds::move(tmp);
