@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sds/intrinsics.h"
-#include <vcruntime.h>
+//#include <vcruntime.h>
 #include <atomic>
 
 namespace sds
