@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sds/details/common.h"
-#include <intrin0.h>
+//#include <intrin0.h>
 #include <climits>
 
 namespace sds

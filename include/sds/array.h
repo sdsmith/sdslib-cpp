@@ -3,6 +3,7 @@
 #include "sds/comparison.h"
 #include "sds/details/common.h"
 #include "sds/iterator.h"
+#include "sds/swap.h"
 #include <type_traits>
 
 #if SDS_INCLUDE_CPPSTD_FEATURES
