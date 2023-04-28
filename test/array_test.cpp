@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "sds/array.h"
+#include "sds/array/array.h"
 
 using namespace sds;
 

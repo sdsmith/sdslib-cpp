@@ -2,7 +2,7 @@
 
 #include "sds/details/common.h"
 
-#include "sds/array.h"
+#include "sds/array/array.h"
 #include "sds/bit.h"
 #include "sds/string.h"
 #include <initializer_list>

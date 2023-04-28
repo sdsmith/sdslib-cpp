@@ -96,7 +96,7 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 # Static library
 # ---------------------------------------------------------------------------------------
 set(SDSLIB_HEADERS
-    "${CMAKE_CURRENT_LIST_DIR}/include/sds/array.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/array.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/carray.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/dynamic_array.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sds/array/make_array.h"
