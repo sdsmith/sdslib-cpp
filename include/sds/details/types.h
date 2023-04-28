@@ -299,7 +299,7 @@ SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + S
 // on ifs vs switch cases. It also differs from usage with the previous __builtin_expect. This means
 // to support switch cases portably there would need to be a separate marco from
 // SDS_LIKELY/SDS_UNLIKELY and it would need to be duplicated; once on the switch condition and once
-// on the case. This is annoying and fragil. There is no easy way to enfornce that this happens or
+// on the case. This is annoying and fragile. There is no easy way to enfor ce that this happens or
 // that the attributes match (ie likely on the conditional and unlikely on a case statement would be
 // problematic!). In lieu of this, I'm going to not make SDS_LIKELY_CASE for now. One day we could
 // switch to C++20 and be done with it.
