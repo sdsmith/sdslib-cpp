@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sds/details/types.h"
+#include "sds/types.h"
 #include "sds/intrinsics.h"
 #include <atomic>
 #include <functional>
