@@ -3,6 +3,8 @@
 #include "sds/intrinsics.h"
 //#include <vcruntime.h>
 #include <atomic>
+#include <functional>
+#include <thread>
 
 namespace sds
 {

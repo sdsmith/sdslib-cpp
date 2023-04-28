@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "sds/bit.h"
-#include "sds/const.h"
+#include "sds/experimental/const.h"
 
 TEST(BitTest, align_up) {
 #define BIT_ALIGN_UP_EQ(Bits, Type, Val) \
