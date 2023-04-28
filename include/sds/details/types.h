@@ -1,4 +1,16 @@
-#pragma once
+ #pragma once
+
+/**
+ * \file types.h
+ * \author Stewart Smith (stewart.dryden.smith@gmail.com)
+ * \brief Project agnostic stuff.
+ *
+ * Q: Why are feature defines set to zero when not supported? Isn't that extra work?
+ * A: Yes, if we just define macros as `#define FOO` it simplifies the code here. However,
+ *  it allows typos to go by silently. Forcing the interface to be `#if FOO` requires that
+ *  FOO is defined, meaning it can't fail silently. This file follows the convention of
+ *  defining 1 for feature enabled and 0 for not for this reason.
+ */
 
 #include <cstddef>
 #include <cstdint>
@@ -29,6 +41,18 @@ constexpr auto operator""_KB(u64 s) { return s * 1024; }
 constexpr auto operator""_MB(u64 s) { return s * 1024_KB; }
 
 constexpr auto operator""_GB(u64 s) { return s * 1024_MB; }
+
+/**
+ * \def SDS_STR
+ * \brief Convert macro value to a string.
+ *
+ * Ex usage:
+ *  #define FOO somevalue
+ *  #pragma message "Value: " SDS_STR(FOO)
+ *      => "Value: somevalue"
+ */
+#define SDS_I_STR(X) #X
+#define SDS_STR(X) SDS_I_STR(X)
 
 /*
  * NOTE(sdsmith): Want static assert available as soon as possible.
@@ -101,13 +125,31 @@ SDS_STATIC_ASSERT_MSG(SDS_OS_WINDOWS + SDS_OS_LINUX + SDS_OS_MAC == 1,
  *
  * Usage: `#if SDS_COMPILER_CLANG`
  */
-
+/**
+ * \def SDS_COMPILER_MINGW32
+ * \brief Clang compiler compiling the project.
+ *
+ * Usage: `#if SDS_COMPILER_MINGW32`
+ */
+/**
+ * \def SDS_COMPILER_MING64
+ * \brief Clang compiler compiling the project.
+ *
+ * Usage: `#if SDS_COMPILER_MINGW64`
+ */
 #if defined(_MSC_VER)
 #    define SDS_COMPILER_MSC 1
+#elif defined(__clang__)
+    // IMPORTANT: Always check clang before gcc.
+    // There's a weird case with MingW's clang compliation, where it
+    // defines both __clang__ and __GNUC__.
+#   define SDS_COMPILER_CLANG 1
 #elif defined(__GNUC__)
 #    define SDS_COMPILER_GCC 1
-#elif defined(__clang__)
-#    define SDS_COMPILER_CLANG 1
+#elif defined(__MINGW32__)
+#    define SDS_COMPILER_MINGW32 1
+#elif defined(__MINGW64__)
+#    define SDS_COMPILER_MINGW64 1
 #else
 #    error Unknown compiler
 #endif
@@ -122,76 +164,132 @@ SDS_STATIC_ASSERT_MSG(SDS_OS_WINDOWS + SDS_OS_LINUX + SDS_OS_MAC == 1,
 #ifndef SDS_COMPILER_CLANG
 #    define SDS_COMPILER_CLANG 0
 #endif
-SDS_STATIC_ASSERT_MSG(SDS_COMPILER_MSC + SDS_COMPILER_GCC + SDS_COMPILER_CLANG == 1,
+#ifndef SDS_COMPILER_MINGW32
+#    define SDS_COMPILER_MINGW32 0
+#endif
+#ifndef SDS_COMPILER_MINGW64
+#    define SDS_COMPILER_MINGW64 0
+#endif
+SDS_STATIC_ASSERT_MSG(SDS_COMPILER_MSC + SDS_COMPILER_GCC + SDS_COMPILER_CLANG + SDS_COMPILER_MINGW32 + SDS_COMPILER_MINGW64 == 1,
                       "must have exactly one compiler set");
 
+//
+// CPU Architecture
+//
+// ref: https://sourceforge.net/p/predef/wiki/Architectures/
+//
+#if defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86)
+// Intel x86
+#   define SDS_ARCH_X86 1
+#elif defined(__x86_64__) || defined(__x86_64__) || defined(_M_X64) || defined(__amd64) || defined(__amd64__) || defined(_M_AMD64)
+#   define SDS_ARCH_AMD64 1
+#else
+#   error Unknown CPU architecture
+#endif
+
+#ifndef SDS_ARCH_X86
+#   define SDS_ARCH_X86 0
+#endif
+#ifndef SDS_ARCH_AMD64
+#   define SDS_ARCH_AMD64 0
+#endif
+SDS_STATIC_ASSERT_MSG(SDS_ARCH_X86 + SDS_ARCH_AMD64 == 1,
+                      "must have exactly one architecture set");
+
 /**
- * \def SDS_CPLUSPLUS
+ * \def SDS_32_BIT
+ * \brief Set if compiling in 32-bit.
+ */
+/**
+ * \def SDS_64_BIT
+ * \brief Set if compiling in 64-bit.
+ */
+#if SDS_OS_WINDOWS
+#   if _WIN64
+#       define SDS_64_BIT 1
+#   else
+#       define SDS_32_BIT 1
+    #endif
+#else
+#   error Unsupported OS
+#endif
+
+#ifndef SDS_64_BIT
+#   define SDS_64_BIT 0
+#endif
+#ifndef SDS_32_BIT
+#   define SDS_32_BIT 0
+#endif
+SDS_STATIC_ASSERT_MSG(SDS_32_BIT + SDS_64_BIT == 1,
+                      "must have exactly one set");
+
+/**
+ * \def SDS_CPP
  * \brief Portable replacement for \a __cplusplus.
  *
  * Microsoft does it again...
  */
-#ifndef SDS_CPLUSPLUS
-#    define SDS_CPLUSPLUS_11 201103L
-#    define SDS_CPLUSPLUS_14 201402L
-#    define SDS_CPLUSPLUS_17 201703L
-#    define SDS_CPLUSPLUS_20 202002L
+#ifndef SDS_CPP
+#    define SDS_CPP_11 201103L
+#    define SDS_CPP_14 201402L
+#    define SDS_CPP_17 201703L
+#    define SDS_CPP_20 202002L
 
 /**
- * \def SDS_CPLUSPLUS
+ * \def SDS_CPP
  * \brief Portable replacement for \a __cplusplus.
  *
  * MSVC incorrectly reports __cplusplus
  * ref: https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
  */
-#    if SDS_COMPILER == SDS_COMPILER_MSC
-#        define SDS_CPLUSPLUS _MSVC_LANG
+#    if SDS_COMPILER_MSC
+#        define SDS_CPP _MSVC_LANG
 #    else
-#        define SDS_CPLUSPLUS __cplusplus
+#        define SDS_CPP __cplusplus
 #    endif
 
 /**
- * \def SDS_CPLUSPLUS_11_SUPPORTED
+ * \def SDS_CPP_11_SUPPORTED
  * \brief True if compiling with C++11 support.
  */
 /**
- * \def SDS_CPLUSPLUS_14_SUPPORTED
+ * \def SDS_CPP_14_SUPPORTED
  * \brief True if compiling with C++14 support.
  */
 /**
- * \def SDS_CPLUSPLUS_17_SUPPORTED
+ * \def SDS_CPP_17_SUPPORTED
  * \brief True if compiling with C++17 support.
  */
 /**
- * \def SDS_CPLUSPLUS_20_SUPPORTED
+ * \def SDS_CPP_20_SUPPORTED
  * \brief True if compiling with C++20 support.
  */
-#    if SDS_CPLUSPLUS >= SDS_CPLUSPLUS_11
-#        define SDS_CPLUSPLUS_11_SUPPORTED 1
+#    if SDS_CPP >= SDS_CPP_11
+#        define SDS_CPP_11_SUPPORTED 1
 #    endif
-#    if SDS_CPLUSPLUS >= SDS_CPLUSPLUS_14
-#        define SDS_CPLUSPLUS_14_SUPPORTED 1
+#    if SDS_CPP >= SDS_CPP_14
+#        define SDS_CPP_14_SUPPORTED 1
 #    endif
-#    if SDS_CPLUSPLUS >= SDS_CPLUSPLUS_17
-#        define SDS_CPLUSPLUS_17_SUPPORTED 1
+#    if SDS_CPP >= SDS_CPP_17
+#        define SDS_CPP_17_SUPPORTED 1
 #    endif
-#    if SDS_CPLUSPLUS >= SDS_CPLUSPLUS_20
-#        define SDS_CPLUSPLUS_20_SUPPORTED 1
+#    if SDS_CPP >= SDS_CPP_20
+#        define SDS_CPP_20_SUPPORTED 1
 #    endif
 
-#    ifndef SDS_CPLUSPLUS_11_SUPPORTED
-#        define SDS_CPLUSPLUS_11_SUPPORTED 0
+#    ifndef SDS_CPP_11_SUPPORTED
+#        define SDS_CPP_11_SUPPORTED 0
 #    endif
-#    ifndef SDS_CPLUSPLUS_14_SUPPORTED
-#        define SDS_CPLUSPLUS_14_SUPPORTED 0
+#    ifndef SDS_CPP_14_SUPPORTED
+#        define SDS_CPP_14_SUPPORTED 0
 #    endif
-#    ifndef SDS_CPLUSPLUS_17_SUPPORTED
-#        define SDS_CPLUSPLUS_17_SUPPORTED 0
+#    ifndef SDS_CPP_17_SUPPORTED
+#        define SDS_CPP_17_SUPPORTED 0
 #    endif
-#    ifndef SDS_CPLUSPLUS_20_SUPPORTED
-#        define SDS_CPLUSPLUS_20_SUPPORTED 0
+#    ifndef SDS_CPP_20_SUPPORTED
+#        define SDS_CPP_20_SUPPORTED 0
 #    endif
-SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + SDS_CPLUSPLUS_20 !=
+SDS_STATIC_ASSERT_MSG(SDS_CPP_11 + SDS_CPP_14 + SDS_CPP_17 + SDS_CPP_20 !=
                           0,
                       "must have at least one c++ version set");
 #endif
@@ -208,6 +306,8 @@ SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + S
  */
 #if SDS_COMPILER_MSC
 #    define SDS_FUNCNAME __FUNCTION__
+#elif defined(SDS_COMPILER_CLANG)
+#   define SDS_FUNCNAME __func__
 #else
 #    define SDS_FUNCNAME __FUNC__
 #endif
@@ -244,7 +344,7 @@ SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + S
 #ifndef SDS_RESTRICT
 #    if SDS_COMPILER_MSC
 #        define SDS_RESTRICT __restrict
-#    elif SDS_COMPILER_GCC || SDS_COMPILER_CLANG
+#    elif defined(SDS_COMPILER_GCC) || defined(SDS_COMPILER_CLANG)
 #        define SDS_RESTRICT __restrict__
 #    else
 #        error Unsupported compiler
@@ -274,10 +374,10 @@ SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + S
  */
 
 #ifndef SDS_LIKELY
-#    if SDS_CPLUSPLUS_20_SUPPORTED
+#    if SDS_CPP_20_SUPPORTED
 // C++20 supports the attribute
 #        define SDS_LIKELY(x) (x) [[likely]]
-#    elif SDS_COMPILER == SDS_COMPILER_GCC || SDS_COMPILER == SDS_COMPILER_CLANG
+#    elif SDS_COMPILER_GCC || SDS_COMPILER_CLANG
 #        define SDS_LIKELY(x) (__builtin_expect(!!(x), 1))
 #    else
 #        define SDS_LIKELY(x) (x)
@@ -285,7 +385,7 @@ SDS_STATIC_ASSERT_MSG(SDS_CPLUSPLUS_11 + SDS_CPLUSPLUS_14 + SDS_CPLUSPLUS_17 + S
 #endif
 
 #ifndef SDS_UNLIKELY
-#    if SDS_CPLUSPLUS_20_SUPPORTED
+#    if SDS_CPP_20_SUPPORTED
 // C++20 supports the attribute
 #        define SDS_UNLIKELY(x) (x) [[unlikely]]
 #    elif SDS_COMPILER_GCC || SDS_COMPILER_CLANG

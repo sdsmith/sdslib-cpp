@@ -1,7 +1,7 @@
 #pragma once
 
+#include "sds/details/types.h"
 #include "sds/intrinsics.h"
-//#include <vcruntime.h>
 #include <atomic>
 #include <functional>
 #include <thread>
