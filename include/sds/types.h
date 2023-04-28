@@ -15,32 +15,6 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace sds
-{
-using s8 = int8_t;
-using s16 = int16_t;
-using s32 = int32_t;
-using s32f = int_fast32_t; /** At least 32bit, larger if faster */
-using s64 = int64_t;
-
-using u8 = uint8_t;
-using u16 = uint16_t;
-using u32 = uint32_t;
-using u32f = uint_fast32_t; /** At least 32bit, larger if faster */
-using u64 = uint64_t;
-
-using f32 = float;
-using f64 = double;
-
-using sz = s32; /** Size type (size_t equivalent) */
-using ptrdiff = std::ptrdiff_t;
-using byte = std::byte;
-
-constexpr auto operator""_KB(u64 s) { return s * 1024; }
-
-constexpr auto operator""_MB(u64 s) { return s * 1024_KB; }
-
-constexpr auto operator""_GB(u64 s) { return s * 1024_MB; }
 
 /**
  * \def SDS_STR
@@ -53,18 +27,6 @@ constexpr auto operator""_GB(u64 s) { return s * 1024_MB; }
  */
 #define SDS_I_STR(X) #X
 #define SDS_STR(X) SDS_I_STR(X)
-
-/*
- * NOTE(sdsmith): Want static assert available as soon as possible.
- */
-#ifndef SDS_STATIC_ASSERT
-/**
- * \def SDS_STATIC_ASSERT
- * \brief Assert used by the library. Defaults to \a static_assert.
- */
-#    define SDS_STATIC_ASSERT(x) static_assert(x)
-#    define SDS_STATIC_ASSERT_MSG(x, msg) static_assert(x, msg)
-#endif
 
 /**
  * \def SDS_OS_WINDOWS
@@ -104,8 +66,6 @@ constexpr auto operator""_GB(u64 s) { return s * 1024_MB; }
 #ifndef SDS_OS_MAC
 #    define SDS_OS_MAC 0
 #endif
-SDS_STATIC_ASSERT_MSG(SDS_OS_WINDOWS + SDS_OS_LINUX + SDS_OS_MAC == 1,
-                      "must have exactly one OS set");
 
 /**
  * \def SDS_COMPILER_MSC
@@ -170,8 +130,6 @@ SDS_STATIC_ASSERT_MSG(SDS_OS_WINDOWS + SDS_OS_LINUX + SDS_OS_MAC == 1,
 #ifndef SDS_COMPILER_MINGW64
 #    define SDS_COMPILER_MINGW64 0
 #endif
-SDS_STATIC_ASSERT_MSG(SDS_COMPILER_MSC + SDS_COMPILER_GCC + SDS_COMPILER_CLANG + SDS_COMPILER_MINGW32 + SDS_COMPILER_MINGW64 == 1,
-                      "must have exactly one compiler set");
 
 //
 // CPU Architecture
@@ -193,8 +151,6 @@ SDS_STATIC_ASSERT_MSG(SDS_COMPILER_MSC + SDS_COMPILER_GCC + SDS_COMPILER_CLANG +
 #ifndef SDS_ARCH_AMD64
 #   define SDS_ARCH_AMD64 0
 #endif
-SDS_STATIC_ASSERT_MSG(SDS_ARCH_X86 + SDS_ARCH_AMD64 == 1,
-                      "must have exactly one architecture set");
 
 /**
  * \def SDS_32_BIT
@@ -220,8 +176,6 @@ SDS_STATIC_ASSERT_MSG(SDS_ARCH_X86 + SDS_ARCH_AMD64 == 1,
 #ifndef SDS_32_BIT
 #   define SDS_32_BIT 0
 #endif
-SDS_STATIC_ASSERT_MSG(SDS_32_BIT + SDS_64_BIT == 1,
-                      "must have exactly one set");
 
 /**
  * \def SDS_CPP
@@ -289,9 +243,7 @@ SDS_STATIC_ASSERT_MSG(SDS_32_BIT + SDS_64_BIT == 1,
 #    ifndef SDS_CPP_20_SUPPORTED
 #        define SDS_CPP_20_SUPPORTED 0
 #    endif
-SDS_STATIC_ASSERT_MSG(SDS_CPP_11 + SDS_CPP_14 + SDS_CPP_17 + SDS_CPP_20 !=
-                          0,
-                      "must have at least one c++ version set");
+// NOTE(sdsmith): Will static assert later after we define a portable static assert.
 #endif
 
 /**
@@ -404,4 +356,113 @@ SDS_STATIC_ASSERT_MSG(SDS_CPP_11 + SDS_CPP_14 + SDS_CPP_17 + SDS_CPP_20 !=
 // problematic!). In lieu of this, I'm going to not make SDS_LIKELY_CASE for now. One day we could
 // switch to C++20 and be done with it.
 
+namespace sds
+{
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
+using s32f = int_fast32_t; /** At least 32bit, larger if faster */
+using s64 = int64_t;
+
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u32f = uint_fast32_t; /** At least 32bit, larger if faster */
+using u64 = uint64_t;
+
+using f32 = float;
+using f64 = double;
+
+using sz = s32; /** Size type (size_t equivalent) */
+using ptrdiff = std::ptrdiff_t;
+using byte = std::byte;
+
+constexpr auto operator""_KB(u64 s) { return s * 1024; }
+
+constexpr auto operator""_MB(u64 s) { return s * 1024_KB; }
+
+constexpr auto operator""_GB(u64 s) { return s * 1024_MB; }
+
+/**
+ * \def SDS_STATIC_ASSERT(expr)
+ * \brief Portable static assertion.
+ *
+ * \param expr Expression.
+ */
+
+/**
+ * \def SDS_STATIC_ASSERT_MSG(expr, msg)
+ * \brief Portable static assertion with a custom message on failure.
+ *
+ * With pre-C++11 implementation, it will fail with an odd commpilation message
+ * only because there isn't support for \a static_assert. The point is it fails.
+ *
+ * \param expr Expression.
+ * \param msg Error message.
+ */
+#define SDS_I_ASSERT_GLUE(a, b) a##b
+#define SDS_ASSERT_GLUE(a, b) SDS_I_ASSERT_GLUE(a, b)
+
+#ifdef SDS_CPP
+#    if SDS_CPP >= SDS_CPP_11
+#        define SDS_STATIC_ASSERT(expr) static_assert(SDS_LIKELY(expr), "static assert failed:" #expr)
+#        define SDS_STATIC_ASSERT_MSG(expr, msg) static_assert(SDS_LIKELY(expr), msg);
+#    else
+// no static_assert prior to c++11
+template <bool>
+class Static_Assert;
+template <>
+class Static_Assert<true> {};
+#        define SDS_STATIC_ASSERT(expr) \
+            enum { SDS_ASSERT_GLUE(g_assert_fail_, __LINE__) = sizeof(Static_Assert<!!(expr)>) }
+#        define SDS_STATIC_ASSERT_MSG(expr, msg) SDS_STATIC_ASSERT(expr)
+#    endif
+#endif
+
+#undef SDS_ASSERT_GLUE
+#undef SDS_I_ASSERT_GLUE
+
+//
+// Now that we have a static assert, do checks.
+//
+// NOTE(sdsmith): This is about the earliest we can introduce the static assert
+// since it has deps on some many other defines.
+//
+SDS_STATIC_ASSERT_MSG(SDS_OS_WINDOWS + SDS_OS_LINUX + SDS_OS_MAC == 1,
+                      "must have exactly one OS set");
+SDS_STATIC_ASSERT_MSG(SDS_COMPILER_MSC + SDS_COMPILER_GCC + SDS_COMPILER_CLANG + SDS_COMPILER_MINGW32 + SDS_COMPILER_MINGW64 == 1,
+                      "must have exactly one compiler set");
+SDS_STATIC_ASSERT_MSG(SDS_ARCH_X86 + SDS_ARCH_AMD64 == 1,
+                      "must have exactly one architecture set");
+SDS_STATIC_ASSERT_MSG(SDS_32_BIT + SDS_64_BIT == 1,
+                      "must have exactly one set");
+SDS_STATIC_ASSERT_MSG(SDS_CPP_11_SUPPORTED + SDS_CPP_14_SUPPORTED + SDS_CPP_17_SUPPORTED + SDS_CPP_20_SUPPORTED !=
+                          0,
+                      "must have at least one c++ version set");
+
 } // namespace sds
+
+
+#ifdef SDS_FORWARD_TYPES_TO_NAMESPACE
+namespace SDS_FORWARD_TYPES_TO_NAMESPACE
+{
+    using s8 = sds::s8;
+    using s16 = sds::s16;
+    using s32 = sds::s32;
+    using s32f = sds::s32f;
+    using s64 = sds::s64;
+
+    using u8 = sds::u8;
+    using u16 = sds::u16;
+    using u32 = sds::u32;
+    using u32f = sds::u32f;
+    using u64 = sds::u64;
+
+    using f32 = sds::f32;
+    using f64 = sds::f64;
+
+    using sz = sds::sz;
+    using ptrdiff = sds::ptrdiff;
+    using byte = sds::byte;
+} // namespace SDS_FORWARD_TYPES_TO_NAMESPACE
+#endif
