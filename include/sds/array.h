@@ -6,13 +6,13 @@
 #include "sds/swap.h"
 #include <type_traits>
 
-#if SDS_INCLUDE_CPPSTD_FEATURES
+#if SDS_INCLUDE_STL_FEATURES
 #    include <array>
 #endif
 
 namespace sds
 {
-#if SDS_INCLUDE_CPPSTD_FEATURES
+#if SDS_INCLUDE_STL_FEATURES
 /**
  * \brief Return the size of the given array in bytes.
  */
