@@ -181,21 +181,16 @@
  * \def SDS_CPP
  * \brief Portable replacement for \a __cplusplus.
  *
- * Microsoft does it again...
+ * MSVC incorrectly reports __cplusplus
+ * ref: https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
  */
 #ifndef SDS_CPP
 #    define SDS_CPP_11 201103L
 #    define SDS_CPP_14 201402L
 #    define SDS_CPP_17 201703L
 #    define SDS_CPP_20 202002L
+#    define SDS_CPP_23 202302L
 
-/**
- * \def SDS_CPP
- * \brief Portable replacement for \a __cplusplus.
- *
- * MSVC incorrectly reports __cplusplus
- * ref: https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
- */
 #    if SDS_COMPILER_MSC
 #        define SDS_CPP _MSVC_LANG
 #    else
@@ -218,6 +213,10 @@
  * \def SDS_CPP_20_SUPPORTED
  * \brief True if compiling with C++20 support.
  */
+/**
+ * \def SDS_CPP_23_SUPPORTED
+ * \brief True if compiling with C++23 support.
+ */
 #    if SDS_CPP >= SDS_CPP_11
 #        define SDS_CPP_11_SUPPORTED 1
 #    endif
@@ -229,6 +228,9 @@
 #    endif
 #    if SDS_CPP >= SDS_CPP_20
 #        define SDS_CPP_20_SUPPORTED 1
+#    endif
+#    if SDS_CPP >= SDS_CPP_23
+#        define SDS_CPP_23_SUPPORTED 1
 #    endif
 
 #    ifndef SDS_CPP_11_SUPPORTED
@@ -242,6 +244,9 @@
 #    endif
 #    ifndef SDS_CPP_20_SUPPORTED
 #        define SDS_CPP_20_SUPPORTED 0
+#    endif
+#    ifndef SDS_CPP_23_SUPPORTED
+#        define SDS_CPP_23_SUPPORTED 0
 #    endif
 // NOTE(sdsmith): Will static assert later after we define a portable static assert.
 #endif
